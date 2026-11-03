@@ -101,6 +101,7 @@ export function CalendarView({
 
   const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
+  const [newDate, setNewDate] = useState<string | null>(null);
   const [dayDetail, setDayDetail] = useState<string | null>(null);
   const detailEvents = dayDetail ? byDate.get(dayDetail) ?? [] : [];
   const detailTitle = dayDetail
@@ -169,7 +170,12 @@ export function CalendarView({
           return (
             <div
               key={key}
-              className={`flex h-28 flex-col overflow-hidden border-b border-r border-zinc-100 p-1 dark:border-zinc-900 ${
+              onDoubleClick={(e) => {
+                // Los controles dentro del día (eventos, «+N más») ya abren su diálogo.
+                if ((e.target as HTMLElement).closest("button, a")) return;
+                setNewDate(key);
+              }}
+              className={`flex h-28 select-none flex-col overflow-hidden border-b border-r border-zinc-100 p-1 dark:border-zinc-900 ${
                 isToday ? "bg-blue-50/60 dark:bg-blue-950/30" : ""
               }`}
             >
@@ -224,6 +230,21 @@ export function CalendarView({
           );
         })}
       </div>
+
+      <EntityDialog
+        title={t("calendar.newEvent")}
+        open={newDate !== null}
+        onOpenChange={(next) => {
+          if (!next) setNewDate(null);
+        }}
+        action={createAction}
+        fields={fields}
+        values={
+          newDate
+            ? { startAt: `${newDate}T09:00`, endAt: `${newDate}T10:00` }
+            : undefined
+        }
+      />
 
       <Dialog
         open={dayDetail !== null}

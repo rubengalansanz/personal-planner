@@ -40,9 +40,11 @@ export function EntityDialog({
   triggerClassName = "text-left",
   hiddenValues,
   extra,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   title: string;
-  trigger: ReactNode;
+  trigger?: ReactNode;
   action: (fd: FormData) => void | Promise<void>;
   fields: FieldDef[];
   values?: Values;
@@ -51,11 +53,19 @@ export function EntityDialog({
   triggerClassName?: string;
   hiddenValues?: Record<string, string | number>;
   extra?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
   const [pending, start] = useTransition();
   const toast = useToast();
   const { t } = useLanguage();
+
+  const setOpen = (next: boolean) => {
+    if (controlledOpen === undefined) setUncontrolledOpen(next);
+    onOpenChange?.(next);
+  };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,13 +88,15 @@ export function EntityDialog({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={triggerClassName}
-      >
-        {trigger}
-      </button>
+      {trigger != null && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={triggerClassName}
+        >
+          {trigger}
+        </button>
+      )}
       <Dialog open={open} onClose={() => setOpen(false)} title={title}>
         <form onSubmit={onSubmit} className="space-y-3">
           {values?.id != null && (
