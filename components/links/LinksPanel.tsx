@@ -8,25 +8,17 @@ import {
   removeLinkAction,
 } from "@/app/actions/links";
 import { Badge, Select, Input, Button, useToast } from "@/components/ui";
+import { useLanguage } from "@/components/LanguageProvider";
 import type { RecordType, LinkedRecord } from "@/lib/data";
 
-const TYPES: { value: RecordType; label: string }[] = [
-  { value: "event", label: "Cita" },
-  { value: "task", label: "Tarea" },
-  { value: "contact", label: "Contacto" },
-  { value: "note", label: "Nota" },
-  { value: "anniversary", label: "Aniversario" },
-  { value: "project", label: "Proyecto" },
+const TYPES: RecordType[] = [
+  "event",
+  "task",
+  "contact",
+  "note",
+  "anniversary",
+  "project",
 ];
-
-const TYPE_LABEL: Record<RecordType, string> = {
-  event: "Cita",
-  task: "Tarea",
-  contact: "Contacto",
-  note: "Nota",
-  anniversary: "Aniversario",
-  project: "Proyecto",
-};
 
 export function LinksPanel({
   sourceType,
@@ -35,11 +27,13 @@ export function LinksPanel({
   sourceType: RecordType;
   sourceId: number;
 }) {
+  const { t } = useLanguage();
   const [links, setLinks] = useState<LinkedRecord[]>([]);
   const [targetType, setTargetType] = useState<RecordType>("contact");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<{ id: number; title: string }[]>([]);
   const toast = useToast();
+  const typeLabel = (type: RecordType) => t(`links.types.${type}`);
 
   const refresh = async () => {
     setLinks(await listLinkedRecordsAction(sourceType, sourceId));
@@ -69,20 +63,20 @@ export function LinksPanel({
     setQuery("");
     setResults([]);
     await refresh();
-    toast("Enlace añadido");
+    toast(t("links.added"));
   };
 
   const onRemove = async (id: number) => {
     await removeLinkAction(id);
     await refresh();
-    toast("Enlace eliminado");
+    toast(t("links.removed"));
   };
 
   return (
     <div className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-      <h3 className="mb-2 text-sm font-semibold">Enlaces</h3>
+      <h3 className="mb-2 text-sm font-semibold">{t("links.title")}</h3>
       {links.length === 0 ? (
-        <p className="text-sm text-zinc-500">Sin enlaces.</p>
+        <p className="text-sm text-zinc-500">{t("links.empty")}</p>
       ) : (
         <ul className="mb-3 space-y-1">
           {links.map((l) => (
@@ -92,7 +86,7 @@ export function LinksPanel({
             >
               <span className="min-w-0">
                 <Badge tone="neutral">
-                  {l.direction === "out" ? "→" : "←"} {TYPE_LABEL[l.type]}
+                  {l.direction === "out" ? "→" : "←"} {typeLabel(l.type)}
                 </Badge>{" "}
                 <a href={l.href} className="hover:underline">
                   {l.title}
@@ -103,7 +97,7 @@ export function LinksPanel({
                 className="px-2 py-1 text-xs"
                 onClick={() => onRemove(l.link.id)}
               >
-                Quitar
+                {t("links.remove")}
               </Button>
             </li>
           ))}
@@ -116,14 +110,14 @@ export function LinksPanel({
             onChange={(e) => setTargetType(e.target.value as RecordType)}
             className="w-36"
           >
-            {TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+            {TYPES.map((type) => (
+              <option key={type} value={type}>
+                {typeLabel(type)}
               </option>
             ))}
           </Select>
           <Input
-            placeholder="Buscar…"
+            placeholder={t("links.search")}
             value={query}
             onChange={(e) => onSearch(e.target.value)}
           />
@@ -141,7 +135,7 @@ export function LinksPanel({
                   className="px-2 py-1 text-xs"
                   onClick={() => onAdd(r.id)}
                 >
-                  Añadir
+                  {t("links.add")}
                 </Button>
               </li>
             ))}

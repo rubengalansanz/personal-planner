@@ -10,6 +10,7 @@ import {
   Label,
   useToast,
 } from "@/components/ui";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export type FieldDef = {
   name: string;
@@ -35,7 +36,7 @@ export function EntityDialog({
   fields,
   values,
   onDelete,
-  submitLabel = "Guardar",
+  submitLabel,
   triggerClassName = "text-left",
   hiddenValues,
   extra,
@@ -54,6 +55,7 @@ export function EntityDialog({
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const toast = useToast();
+  const { t } = useLanguage();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,7 +63,7 @@ export function EntityDialog({
     start(async () => {
       await action(fd);
       setOpen(false);
-      toast("Guardado");
+      toast(t("common.saved"));
     });
   };
 
@@ -70,7 +72,7 @@ export function EntityDialog({
     start(async () => {
       await onDelete?.(Number(values.id));
       setOpen(false);
-      toast("Eliminado");
+      toast(t("common.deleted"));
     });
   };
 
@@ -105,7 +107,7 @@ export function EntityDialog({
                   disabled={pending}
                   onClick={onDeleteClick}
                 >
-                  Eliminar
+                  {t("common.delete")}
                 </Button>
               )}
             </div>
@@ -115,10 +117,10 @@ export function EntityDialog({
                 variant="ghost"
                 onClick={() => setOpen(false)}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={pending}>
-                {submitLabel}
+                {submitLabel ?? t("common.save")}
               </Button>
             </div>
           </div>

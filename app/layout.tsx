@@ -4,6 +4,8 @@ import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ThemeInit } from "@/components/ThemeInit";
+import { LanguageProvider } from "@/components/LanguageProvider";
+import { getLanguage } from "@/lib/i18n-server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,25 +18,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agenda Personal",
-  description: "Agenda personal estilo IBM/Lotus Organizer",
+  title: "Personal Planner",
+  description: "Personal planner estilo IBM/Lotus Organizer",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const language = await getLanguage();
+
   return (
     <html
-      lang="es"
+      lang={language}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full">
         <ThemeInit />
-        <ToastProvider>
-          <div className="flex h-full">
-            <Sidebar />
-            <main className="flex-1 overflow-x-hidden">{children}</main>
-          </div>
-        </ToastProvider>
+        <LanguageProvider initialLanguage={language}>
+          <ToastProvider>
+            <div className="flex h-full">
+              <Sidebar />
+              <main className="flex-1 overflow-x-hidden">{children}</main>
+            </div>
+          </ToastProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

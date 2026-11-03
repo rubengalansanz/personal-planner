@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export function Dialog({
   open,
@@ -13,6 +14,8 @@ export function Dialog({
   title: ReactNode;
   children: ReactNode;
 }) {
+  const { t } = useLanguage();
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -41,7 +44,7 @@ export function Dialog({
           <button
             onClick={onClose}
             className="rounded p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           >
             <svg
               viewBox="0 0 24 24"

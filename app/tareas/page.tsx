@@ -17,47 +17,49 @@ import {
   type FieldDef,
 } from "@/components/ui";
 import { LinksPanel } from "@/components/links/LinksPanel";
+import { getTranslator } from "@/lib/i18n-server";
+import type { Translator } from "@/lib/i18n";
 import type { TaskRow } from "@/db/schema";
 
-const PRIORITY: Record<number, string> = { 1: "Alta", 2: "Media", 3: "Baja" };
+function taskFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("tasks.titleField"), required: true },
+    { name: "notes", label: t("tasks.notesField"), type: "textarea" },
+    { name: "startDate", label: t("tasks.startDate"), type: "date" },
+    { name: "dueDate", label: t("tasks.dueDate"), type: "date" },
+    {
+      name: "priority",
+      label: t("tasks.priority"),
+      type: "select",
+      options: [
+        { value: "1", label: t("tasks.priorities.1") },
+        { value: "2", label: t("tasks.priorities.2") },
+        { value: "3", label: t("tasks.priorities.3") },
+      ],
+    },
+    {
+      name: "status",
+      label: t("tasks.status"),
+      type: "select",
+      options: [
+        { value: "pending", label: t("tasks.statuses.pending") },
+        { value: "done", label: t("tasks.statuses.done") },
+      ],
+    },
+    { name: "category", label: t("tasks.category") },
+  ];
+}
 
-const taskFields: FieldDef[] = [
-  { name: "title", label: "Título", required: true },
-  { name: "notes", label: "Notas", type: "textarea" },
-  { name: "startDate", label: "Inicio", type: "date" },
-  { name: "dueDate", label: "Vencimiento", type: "date" },
-  {
-    name: "priority",
-    label: "Prioridad",
-    type: "select",
-    options: [
-      { value: "1", label: "Alta" },
-      { value: "2", label: "Media" },
-      { value: "3", label: "Baja" },
-    ],
-  },
-  {
-    name: "status",
-    label: "Estado",
-    type: "select",
-    options: [
-      { value: "pending", label: "Pendiente" },
-      { value: "done", label: "Hecha" },
-    ],
-  },
-  { name: "category", label: "Categoría" },
-];
-
-function taskValues(t: TaskRow) {
+function taskValues(task: TaskRow) {
   return {
-    id: t.id,
-    title: t.title,
-    notes: t.notes,
-    startDate: isoToDate(t.startDate),
-    dueDate: isoToDate(t.dueDate),
-    priority: t.priority,
-    status: t.status,
-    category: t.category,
+    id: task.id,
+    title: task.title,
+    notes: task.notes,
+    startDate: isoToDate(task.startDate),
+    dueDate: isoToDate(task.dueDate),
+    priority: task.priority,
+    status: task.status,
+    category: task.category,
   };
 }
 
@@ -65,72 +67,80 @@ const triggerClass =
   "inline-flex items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-zinc-700 dark:hover:bg-zinc-300";
 
 export default async function TareasPage() {
+  const t = await getTranslator();
   const tasks = await listTasks();
+  const fields = taskFields(t);
 
   return (
     <>
       <PageHeader
-        title="Tareas"
-        description="Lista de tareas con prioridad y vencimiento."
+        title={t("tasks.title")}
+        description={t("tasks.description")}
         action={
           <EntityDialog
-            title="Nueva tarea"
-            trigger="Nueva tarea"
+            title={t("tasks.newTask")}
+            trigger={t("tasks.newTask")}
             action={createTaskAction}
-            fields={taskFields}
+            fields={fields}
             triggerClassName={triggerClass}
           />
         }
       />
       <div className="p-4">
         {tasks.length === 0 ? (
-          <EmptyState>No hay tareas todavía.</EmptyState>
+          <EmptyState>{t("tasks.empty")}</EmptyState>
         ) : (
           <Table>
             <thead>
               <tr>
-                <Th>Título</Th>
-                <Th>Vencimiento</Th>
-                <Th>Prioridad</Th>
-                <Th>Estado</Th>
-                <Th>Categoría</Th>
+                <Th>{t("tasks.titleField")}</Th>
+                <Th>{t("tasks.dueDate")}</Th>
+                <Th>{t("tasks.priority")}</Th>
+                <Th>{t("tasks.status")}</Th>
+                <Th>{t("tasks.category")}</Th>
                 <Th />
               </tr>
             </thead>
             <tbody>
-              {tasks.map((t) => (
-                <tr key={t.id}>
-                  <Td>{t.title}</Td>
-                  <Td>{t.dueDate ? isoToDate(t.dueDate) : "—"}</Td>
+              {tasks.map((task) => (
+                <tr key={task.id}>
+                  <Td>{task.title}</Td>
+                  <Td>{task.dueDate ? isoToDate(task.dueDate) : "—"}</Td>
                   <Td>
                     <Badge
                       tone={
-                        t.priority === 1
+                        task.priority === 1
                           ? "danger"
-                          : t.priority === 2
+                          : task.priority === 2
                             ? "warning"
                             : "neutral"
                       }
                     >
-                      {PRIORITY[t.priority]}
+                      {t(`tasks.priorities.${task.priority}`)}
                     </Badge>
                   </Td>
-                  <Td>{t.status === "done" ? "Hecha" : "Pendiente"}</Td>
-                  <Td>{t.category}</Td>
+                  <Td>
+                    {task.status === "done"
+                      ? t("tasks.statuses.done")
+                      : t("tasks.statuses.pending")}
+                  </Td>
+                  <Td>{task.category}</Td>
                   <Td className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
-                        title="Editar tarea"
-                        trigger="Editar"
+                        title={t("tasks.editTask")}
+                        trigger={t("common.edit")}
                         action={updateTaskAction}
-                        fields={taskFields}
-                        values={taskValues(t)}
-                        extra={<LinksPanel sourceType="task" sourceId={t.id} />}
+                        fields={fields}
+                        values={taskValues(task)}
+                        extra={
+                          <LinksPanel sourceType="task" sourceId={task.id} />
+                        }
                         onDelete={deleteTaskAction}
                       />
-                      <form action={deleteTaskAction.bind(null, t.id)}>
+                      <form action={deleteTaskAction.bind(null, task.id)}>
                         <Button variant="danger" type="submit">
-                          Eliminar
+                          {t("common.delete")}
                         </Button>
                       </form>
                     </div>

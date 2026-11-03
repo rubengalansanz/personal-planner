@@ -3,24 +3,36 @@
 import { useMemo, useState } from "react";
 import { Dialog, EntityDialog, type FieldDef } from "@/components/ui";
 import { LinksPanel } from "@/components/links/LinksPanel";
+import { useLanguage } from "@/components/LanguageProvider";
+import type { Translator } from "@/lib/i18n";
 import type { EventRow } from "@/db/schema";
 import { isoToDatetimeLocal } from "@/lib/datetime";
 
-const MESES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-];
-const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-const eventFields: FieldDef[] = [
-  { name: "title", label: "Título", required: true },
-  { name: "startAt", label: "Inicio", type: "datetime-local", required: true },
-  { name: "endAt", label: "Fin", type: "datetime-local", required: true },
-  { name: "allDay", label: "Todo el día", type: "checkbox" },
-  { name: "location", label: "Lugar" },
-  { name: "reminderMin", label: "Recordar (min antes)", type: "number" },
-  { name: "description", label: "Descripción", type: "textarea" },
-];
+function eventFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("calendar.titleField"), required: true },
+    {
+      name: "startAt",
+      label: t("calendar.startAt"),
+      type: "datetime-local",
+      required: true,
+    },
+    {
+      name: "endAt",
+      label: t("calendar.endAt"),
+      type: "datetime-local",
+      required: true,
+    },
+    { name: "allDay", label: t("calendar.allDay"), type: "checkbox" },
+    { name: "location", label: t("calendar.location") },
+    { name: "reminderMin", label: t("calendar.reminder"), type: "number" },
+    {
+      name: "description",
+      label: t("calendar.descriptionField"),
+      type: "textarea",
+    },
+  ];
+}
 
 function eventValues(e: EventRow) {
   return {
@@ -46,6 +58,8 @@ export function CalendarView({
   updateAction: (fd: FormData) => void | Promise<void>;
   deleteAction: (id: number) => void | Promise<void>;
 }) {
+  const { t } = useLanguage();
+  const fields = eventFields(t);
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -90,7 +104,11 @@ export function CalendarView({
   const [dayDetail, setDayDetail] = useState<string | null>(null);
   const detailEvents = dayDetail ? byDate.get(dayDetail) ?? [] : [];
   const detailTitle = dayDetail
-    ? `Eventos · ${Number(dayDetail.slice(8, 10))} ${MESES[Number(dayDetail.slice(5, 7)) - 1]}`
+    ? t("calendar.eventsOn", {
+        date: `${Number(dayDetail.slice(8, 10))} ${t(
+          `months.${Number(dayDetail.slice(5, 7))}`,
+        )}`,
+      })
     : "";
 
   return (
@@ -100,37 +118,37 @@ export function CalendarView({
           <button
             onClick={prev}
             className="rounded p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            aria-label="Mes anterior"
+            aria-label={t("calendar.prevMonth")}
           >
             ‹
           </button>
           <span className="min-w-32 text-center text-sm font-semibold">
-            {MESES[month]} {year}
+            {t(`months.${month + 1}`)} {year}
           </span>
           <button
             onClick={next}
             className="rounded p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            aria-label="Mes siguiente"
+            aria-label={t("calendar.nextMonth")}
           >
             ›
           </button>
         </div>
         <EntityDialog
-          title="Nueva cita"
-          trigger="Nueva cita"
+          title={t("calendar.newEvent")}
+          trigger={t("calendar.newEvent")}
           action={createAction}
-          fields={eventFields}
+          fields={fields}
           triggerClassName="inline-flex items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-zinc-700 dark:hover:bg-zinc-300"
         />
       </div>
 
       <div className="grid grid-cols-7 border-b border-zinc-200 dark:border-zinc-800">
-        {DIAS.map((d) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
           <div
             key={d}
             className="px-2 py-1 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400"
           >
-            {d}
+            {t(`weekdays.${d}`)}
           </div>
         ))}
       </div>
@@ -156,7 +174,7 @@ export function CalendarView({
               }`}
             >
               <EntityDialog
-                title="Nueva cita"
+                title={t("calendar.newEvent")}
                 trigger={
                   <span
                     className={`inline-block rounded px-1 text-xs ${
@@ -169,7 +187,7 @@ export function CalendarView({
                   </span>
                 }
                 action={createAction}
-                fields={eventFields}
+                fields={fields}
                 values={{
                   startAt: `${key}T09:00`,
                   endAt: `${key}T10:00`,
@@ -179,14 +197,14 @@ export function CalendarView({
                 {dayEvents.slice(0, 2).map((e) => (
                   <EntityDialog
                     key={e.id}
-                    title="Editar cita"
+                    title={t("calendar.editEvent")}
                     trigger={
                       <span className="block truncate rounded bg-blue-100 px-1 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                         {e.title}
                       </span>
                     }
                     action={updateAction}
-                    fields={eventFields}
+                    fields={fields}
                     values={eventValues(e)}
                     extra={<LinksPanel sourceType="event" sourceId={e.id} />}
                     onDelete={deleteAction}
@@ -198,7 +216,7 @@ export function CalendarView({
                     onClick={() => setDayDetail(key)}
                     className="block w-full truncate rounded px-1 text-left text-xs text-blue-600 hover:underline dark:text-blue-400"
                   >
-                    +{dayEvents.length - 2} más
+                    {t("calendar.more", { n: dayEvents.length - 2 })}
                   </button>
                 )}
               </div>
@@ -207,14 +225,18 @@ export function CalendarView({
         })}
       </div>
 
-      <Dialog open={dayDetail !== null} onClose={() => setDayDetail(null)} title={detailTitle}>
+      <Dialog
+        open={dayDetail !== null}
+        onClose={() => setDayDetail(null)}
+        title={detailTitle}
+      >
         <div className="space-y-3">
           {dayDetail && (
             <EntityDialog
-              title="Nueva cita"
-              trigger="Nueva cita"
+              title={t("calendar.newEvent")}
+              trigger={t("calendar.newEvent")}
               action={createAction}
-              fields={eventFields}
+              fields={fields}
               triggerClassName="inline-flex items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-zinc-700 dark:hover:bg-zinc-300"
               values={{
                 startAt: `${dayDetail}T09:00`,
@@ -226,7 +248,7 @@ export function CalendarView({
             {detailEvents.map((e) => (
               <li key={e.id}>
                 <EntityDialog
-                  title="Editar cita"
+                  title={t("calendar.editEvent")}
                   trigger={
                     <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-800">
                       <span className="truncate font-medium">{e.title}</span>
@@ -236,7 +258,7 @@ export function CalendarView({
                     </div>
                   }
                   action={updateAction}
-                  fields={eventFields}
+                  fields={fields}
                   values={eventValues(e)}
                   extra={<LinksPanel sourceType="event" sourceId={e.id} />}
                   onDelete={deleteAction}

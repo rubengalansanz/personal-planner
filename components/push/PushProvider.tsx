@@ -7,6 +7,7 @@ import {
   listDueRemindersAction,
 } from "@/app/actions/push";
 import { useToast } from "@/components/ui";
+import { useLanguage } from "@/components/LanguageProvider";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -31,6 +32,7 @@ type Status =
 export function PushProvider() {
   const [status, setStatus] = useState<Status>("loading");
   const toast = useToast();
+  const { t } = useLanguage();
   const regRef = useRef<ServiceWorkerRegistration | null>(null);
   const notified = useRef<Set<string>>(new Set());
 
@@ -84,7 +86,7 @@ export function PushProvider() {
         } else if (regRef.current && regRef.current.active) {
           regRef.current.active.postMessage({
             type: "local-notification",
-            title: "Agenda · Recordatorio",
+            title: t("push.notificationTitle"),
             body: d.title,
             tag: key,
           });
@@ -94,22 +96,24 @@ export function PushProvider() {
     void tick();
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
-  }, [status]);
+  }, [status, t]);
 
   if (status === "loading" || status === "electron") {
     return status === "electron" ? (
       <p className="px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
-        ● Recordatorios activos (nativo)
+        {t("push.native")}
       </p>
     ) : (
-      <p className="px-3 py-2 text-xs text-zinc-400">Cargando...</p>
+      <p className="px-3 py-2 text-xs text-zinc-400">
+        {t("push.loading")}
+      </p>
     );
   }
 
   if (status === "unsupported") {
     return (
       <p className="px-3 py-2 text-xs text-zinc-400">
-        Notificaciones no soportadas en este navegador.
+        {t("push.unsupported")}
       </p>
     );
   }
@@ -117,7 +121,7 @@ export function PushProvider() {
   if (status === "subscribed") {
     return (
       <p className="px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
-        ● Recordatorios activos
+        {t("push.active")}
       </p>
     );
   }
@@ -128,9 +132,7 @@ export function PushProvider() {
       onClick={enable}
       className="mx-3 mb-2 rounded-md border border-zinc-200 px-3 py-2 text-left text-xs font-medium hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-800"
     >
-      {status === "denied"
-        ? "Notificaciones bloqueadas (cámbialo en el navegador)"
-        : "Activar recordatorios"}
+      {status === "denied" ? t("push.denied") : t("push.enable")}
     </button>
   );
 
@@ -139,7 +141,7 @@ export function PushProvider() {
     Notification.requestPermission().then((perm) => {
       if (perm !== "granted") {
         setStatus("denied");
-        toast("Permiso de notificaciones denegado");
+        toast(t("push.deniedToast"));
         return;
       }
       regRef.current!.pushManager
@@ -156,7 +158,7 @@ export function PushProvider() {
         })
         .then(() => {
           setStatus("subscribed");
-          toast("Recordatorios activados");
+          toast(t("push.enabled"));
         });
     });
   }

@@ -13,10 +13,10 @@ import {
   EmptyState,
   Badge,
 } from "@/components/ui";
-
-const PRIORITY: Record<number, string> = { 1: "Alta", 2: "Media", 3: "Baja" };
+import { getTranslator } from "@/lib/i18n-server";
 
 export default async function CalendarioPage() {
+  const t = await getTranslator();
   const [events, tasks, planner] = await Promise.all([
     listEvents(),
     listTasks({ status: "pending" }),
@@ -26,14 +26,14 @@ export default async function CalendarioPage() {
   return (
     <>
       <PageHeader
-        title="Calendario"
-        description="Citas y eventos (vista mes)."
+        title={t("calendar.title")}
+        description={t("calendar.description")}
         action={
           <a
             href="/api/calendar"
             className="rounded-md border border-zinc-200 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-800"
           >
-            Exportar .ics
+            {t("calendar.exportIcs")}
           </a>
         }
       />
@@ -49,29 +49,31 @@ export default async function CalendarioPage() {
         <div className="space-y-4">
           <Card>
             <CardHeader
-              title="Tareas pendientes"
-              description={`${tasks.length} por hacer`}
+              title={t("calendar.pendingTasks")}
+              description={t("calendar.pendingTasksCount", {
+                n: tasks.length,
+              })}
             />
             <CardBody className="space-y-2">
               {tasks.length === 0 ? (
-                <EmptyState>Sin tareas pendientes</EmptyState>
+                <EmptyState>{t("calendar.noPendingTasks")}</EmptyState>
               ) : (
-                tasks.map((t) => (
+                tasks.map((task) => (
                   <div
-                    key={t.id}
+                    key={task.id}
                     className="flex items-center justify-between gap-2 text-sm"
                   >
-                    <span className="truncate">{t.title}</span>
+                    <span className="truncate">{task.title}</span>
                     <Badge
                       tone={
-                        t.priority === 1
+                        task.priority === 1
                           ? "danger"
-                          : t.priority === 2
+                          : task.priority === 2
                             ? "warning"
                             : "neutral"
                       }
                     >
-                      {PRIORITY[t.priority]}
+                      {t(`tasks.priorities.${task.priority}`)}
                     </Badge>
                   </div>
                 ))
@@ -79,19 +81,22 @@ export default async function CalendarioPage() {
             </CardBody>
           </Card>
           <Card>
-            <CardHeader title="Próximos hitos" description="Planner (30 días)" />
+            <CardHeader
+              title={t("calendar.upcomingMilestones")}
+              description={t("calendar.upcomingMilestonesDesc")}
+            />
             <CardBody className="space-y-2">
               {planner.length === 0 ? (
-                <EmptyState>Sin hitos próximos</EmptyState>
+                <EmptyState>{t("calendar.noUpcomingMilestones")}</EmptyState>
               ) : (
-                planner.map((p) => (
+                planner.map((item) => (
                   <div
-                    key={p.id}
+                    key={item.id}
                     className="flex items-center justify-between gap-2 text-sm"
                   >
-                    <span className="truncate">{p.title}</span>
+                    <span className="truncate">{item.title}</span>
                     <span className="text-xs text-zinc-500">
-                      {p.dueDate?.slice(0, 10)}
+                      {item.dueDate?.slice(0, 10)}
                     </span>
                   </div>
                 ))

@@ -16,13 +16,17 @@ import {
   type FieldDef,
 } from "@/components/ui";
 import { LinksPanel } from "@/components/links/LinksPanel";
+import { getTranslator } from "@/lib/i18n-server";
+import type { Translator } from "@/lib/i18n";
 import type { NoteRow } from "@/db/schema";
 
-const noteFields: FieldDef[] = [
-  { name: "title", label: "Título", required: true },
-  { name: "category", label: "Categoría" },
-  { name: "content", label: "Contenido", type: "textarea" },
-];
+function noteFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("notes.titleField"), required: true },
+    { name: "category", label: t("notes.category") },
+    { name: "content", label: t("notes.contentField"), type: "textarea" },
+  ];
+}
 
 function noteValues(n: NoteRow) {
   return {
@@ -37,33 +41,35 @@ const triggerClass =
   "inline-flex items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-zinc-700 dark:hover:bg-zinc-300";
 
 export default async function NotasPage() {
+  const t = await getTranslator();
   const notes = await listNotes();
+  const fields = noteFields(t);
 
   return (
     <>
       <PageHeader
-        title="Notas"
-        description="Notas libres (markdown)."
+        title={t("notes.title")}
+        description={t("notes.description")}
         action={
           <EntityDialog
-            title="Nueva nota"
-            trigger="Nueva nota"
+            title={t("notes.newNote")}
+            trigger={t("notes.newNote")}
             action={createNoteAction}
-            fields={noteFields}
+            fields={fields}
             triggerClassName={triggerClass}
           />
         }
       />
       <div className="p-4">
         {notes.length === 0 ? (
-          <EmptyState>No hay notas todavía.</EmptyState>
+          <EmptyState>{t("notes.empty")}</EmptyState>
         ) : (
           <Table>
             <thead>
               <tr>
-                <Th>Título</Th>
-                <Th>Categoría</Th>
-                <Th>Actualizada</Th>
+                <Th>{t("notes.titleField")}</Th>
+                <Th>{t("notes.category")}</Th>
+                <Th>{t("notes.updated")}</Th>
                 <Th />
               </tr>
             </thead>
@@ -78,17 +84,19 @@ export default async function NotasPage() {
                   <Td className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
-                        title="Editar nota"
-                        trigger="Editar"
+                        title={t("notes.editNote")}
+                        trigger={t("common.edit")}
                         action={updateNoteAction}
-                        fields={noteFields}
+                        fields={fields}
                         values={noteValues(n)}
-                        extra={<LinksPanel sourceType="note" sourceId={n.id} />}
+                        extra={
+                          <LinksPanel sourceType="note" sourceId={n.id} />
+                        }
                         onDelete={deleteNoteAction}
                       />
                       <form action={deleteNoteAction.bind(null, n.id)}>
                         <Button variant="danger" type="submit">
-                          Eliminar
+                          {t("common.delete")}
                         </Button>
                       </form>
                     </div>
