@@ -69,7 +69,7 @@ function calendarHeader(): string[] {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Agenda Personal//ES",
+    "PRODID:-//Personal Planner//ES",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
   ];

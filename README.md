@@ -1,4 +1,4 @@
-# Agenda Personal
+# Personal Planner
 
 Aplicación de agenda personal con calendario, tareas, contactos, notas y planner. Funciona como aplicación web y de escritorio (Electron).
 

@@ -56,7 +56,7 @@ agenda.db-wal
 # ficheros markdown
 agenda-personal.md
 GEMINI.md
-session-agenda-personal_*
+session-personal-planner-*
 
 # carpetas ocultas
 /.claude/
