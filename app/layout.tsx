@@ -29,9 +29,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang={language}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="h-full">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem("theme");var d=s?s==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;var r=document.documentElement;if(d)r.classList.add("dark");else r.classList.remove("dark");r.style.colorScheme=d?"dark":"light";}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
         <ThemeInit />
         <LanguageProvider initialLanguage={language}>
           <ToastProvider>

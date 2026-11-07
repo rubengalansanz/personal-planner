@@ -1,4 +1,4 @@
-import { listProjects, listPlannerItems } from "@/lib/data";
+import { listProjects, listPlannerItems, listEvents } from "@/lib/data";
 import {
   createProjectAction,
   updateProjectAction,
@@ -132,6 +132,11 @@ export default async function PlannerPage() {
       items: await listPlannerItems(p.id),
     })),
   );
+  const events = await listEvents();
+  const upcomingEvents = events
+    .filter((e) => new Date(e.startAt) >= new Date())
+    .sort((a, b) => a.startAt.localeCompare(b.startAt))
+    .slice(0, 10);
   const projects_ = projectFields(t);
   const items_ = itemFields(t);
 
@@ -273,6 +278,27 @@ export default async function PlannerPage() {
               </Card>
             );
           })
+        )}
+        {upcomingEvents.length > 0 && (
+          <Card>
+            <CardHeader
+              title={t("planner.upcomingEvents") ?? "Próximas citas"}
+              description={t("planner.upcomingEventsDesc") ?? "Citas del calendario"}
+            />
+            <CardBody className="space-y-2">
+              {upcomingEvents.map((e) => (
+                <div
+                  key={e.id}
+                  className="flex items-center justify-between gap-2 text-sm"
+                >
+                  <span className="truncate">{e.title}</span>
+                  <span className="text-xs text-zinc-500">
+                    {e.startAt.slice(0, 10)}
+                  </span>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
         )}
       </div>
     </>

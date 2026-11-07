@@ -37,6 +37,8 @@ const es = {
     inDays: "en {n} días",
     noDate: "sin fecha",
     none: "(sin)",
+    all: "Todas",
+    apply: "Aplicar",
   },
   months: {
     1: "Enero",
@@ -147,7 +149,7 @@ const es = {
   },
   notes: {
     title: "Notas",
-    description: "Notas libres (markdown).",
+    description: "Notas libres.",
     newNote: "Nueva nota",
     editNote: "Editar nota",
     titleField: "Título",
@@ -264,6 +266,8 @@ const en: Translations = {
     inDays: "in {n} days",
     noDate: "no date",
     none: "(none)",
+    all: "All",
+    apply: "Apply",
   },
   months: {
     1: "January",
@@ -374,7 +378,7 @@ const en: Translations = {
   },
   notes: {
     title: "Notes",
-    description: "Free-form notes (markdown).",
+    description: "Free-form notes.",
     newNote: "New note",
     editNote: "Edit note",
     titleField: "Title",
@@ -489,6 +493,8 @@ const de: Translations = {
     inDays: "in {n} Tagen",
     noDate: "ohne Datum",
     none: "(keine)",
+    all: "Alle",
+    apply: "Anwenden",
   },
   months: {
     1: "Januar",
@@ -714,6 +720,8 @@ const fr: Translations = {
     inDays: "dans {n} jours",
     noDate: "sans date",
     none: "(aucun)",
+    all: "Toutes",
+    apply: "Appliquer",
   },
   months: {
     1: "Janvier",
@@ -824,7 +832,7 @@ const fr: Translations = {
   },
   notes: {
     title: "Notes",
-    description: "Notes libres (markdown).",
+    description: "Notes libres.",
     newNote: "Nouvelle note",
     editNote: "Modifier la note",
     titleField: "Titre",
@@ -939,6 +947,8 @@ const it: Translations = {
     inDays: "tra {n} giorni",
     noDate: "senza data",
     none: "(nessuno)",
+    all: "Tutte",
+    apply: "Applica",
   },
   months: {
     1: "Gennaio",
@@ -1049,7 +1059,7 @@ const it: Translations = {
   },
   notes: {
     title: "Note",
-    description: "Note libere (markdown).",
+    description: "Note libere.",
     newNote: "Nuova nota",
     editNote: "Modifica nota",
     titleField: "Titolo",
@@ -1164,6 +1174,8 @@ const pt: Translations = {
     inDays: "em {n} dias",
     noDate: "sem data",
     none: "(sem)",
+    all: "Todas",
+    apply: "Aplicar",
   },
   months: {
     1: "Janeiro",
@@ -1274,7 +1286,7 @@ const pt: Translations = {
   },
   notes: {
     title: "Notas",
-    description: "Notas livres (markdown).",
+    description: "Notas livres.",
     newNote: "Nova nota",
     editNote: "Editar nota",
     titleField: "Título",

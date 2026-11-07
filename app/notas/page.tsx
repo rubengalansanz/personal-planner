@@ -40,10 +40,22 @@ function noteValues(n: NoteRow) {
 const triggerClass =
   "inline-flex items-center justify-center rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background hover:bg-zinc-700 dark:hover:bg-zinc-300";
 
-export default async function NotasPage() {
+export default async function NotasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; sort?: string }>;
+}) {
   const t = await getTranslator();
-  const notes = await listNotes();
+  const sp = await searchParams;
+  const category = sp?.category || undefined;
+  const sort = (sp?.sort as "title" | "category" | "updated") || "title";
+  const notes = await listNotes(category, sort);
   const fields = noteFields(t);
+
+  const allNotes = await listNotes();
+  const categories = Array.from(
+    new Set(allNotes.map((n) => n.category).filter(Boolean)),
+  );
 
   return (
     <>
@@ -61,6 +73,36 @@ export default async function NotasPage() {
         }
       />
       <div className="p-4">
+        <form
+          method="get"
+          action="/notas"
+          className="mb-4 flex flex-wrap items-center gap-2"
+        >
+          <select
+            name="category"
+            defaultValue={category ?? ""}
+            className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <option value="">{t("common.all")}</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <select
+            name="sort"
+            defaultValue={sort}
+            className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-sm dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <option value="title">{t("notes.titleField")}</option>
+            <option value="category">{t("notes.category")}</option>
+            <option value="updated">{t("notes.updated")}</option>
+          </select>
+          <Button type="submit" variant="secondary">
+            {t("common.apply")}
+          </Button>
+        </form>
         {notes.length === 0 ? (
           <EmptyState>{t("notes.empty")}</EmptyState>
         ) : (

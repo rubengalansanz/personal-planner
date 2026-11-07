@@ -39,12 +39,14 @@ export function Sidebar() {
   const { t } = useLanguage();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50">
-      <div className="flex h-14 items-center justify-between gap-2 border-b border-zinc-200 px-4 dark:border-zinc-800">
-        <span className="text-lg font-semibold tracking-tight">{t("agenda")}</span>
+    <aside className="flex h-full w-14 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50 md:w-60">
+      <div className="flex h-14 items-center justify-between gap-2 border-b border-zinc-200 px-2 dark:border-zinc-800 md:px-4">
+        <span className="hidden text-lg font-semibold tracking-tight md:inline">
+          {t("agenda")}
+        </span>
         <ThemeToggle />
       </div>
-      <nav className="flex flex-col gap-1 p-3">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2 md:p-3">
         {sections.map((s) => {
           const active =
             pathname === s.href || pathname.startsWith(`${s.href}/`);
@@ -52,31 +54,33 @@ export function Sidebar() {
             <Link
               key={s.href}
               href={s.href}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              title={t(s.labelKey)}
+              className={`flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors md:px-3 ${
                 active
                   ? "bg-foreground text-background"
                   : "text-zinc-700 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800"
               }`}
             >
               <NavIcon d={s.icon} />
-              {t(s.labelKey)}
+              <span className="hidden md:inline">{t(s.labelKey)}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="mt-auto border-t border-zinc-200 p-3 dark:border-zinc-800">
+      <div className="mt-auto border-t border-zinc-200 p-2 dark:border-zinc-800 md:p-3">
         <Link
           href={settingsSection.href}
-          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+          title={t(settingsSection.labelKey)}
+          className={`flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors md:px-3 ${
             pathname === settingsSection.href
               ? "bg-foreground text-background"
               : "text-zinc-700 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800"
           }`}
         >
           <NavIcon d={settingsSection.icon} />
-          {t(settingsSection.labelKey)}
+          <span className="hidden md:inline">{t(settingsSection.labelKey)}</span>
         </Link>
-        <div className="mt-2">
+        <div className="mt-2 hidden md:block">
           <PushProvider />
         </div>
       </div>

@@ -5,13 +5,22 @@ import { notes, type NoteRow } from "@/db/schema";
 
 export type NoteInsert = typeof notes.$inferInsert;
 
-export async function listNotes(category?: string): Promise<NoteRow[]> {
+export async function listNotes(
+  category?: string,
+  sort: "title" | "category" | "updated" = "title",
+): Promise<NoteRow[]> {
   await connection();
+  const orderBy =
+    sort === "category"
+      ? asc(notes.category)
+      : sort === "updated"
+        ? asc(notes.updatedAt)
+        : asc(notes.title);
   return db
     .select()
     .from(notes)
     .where(category ? eq(notes.category, category) : undefined)
-    .orderBy(asc(notes.title));
+    .orderBy(orderBy);
 }
 
 export async function getNote(id: number): Promise<NoteRow | undefined> {

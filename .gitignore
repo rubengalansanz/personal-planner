@@ -57,6 +57,7 @@ agenda.db-wal
 agenda-personal.md
 GEMINI.md
 session-personal-planner-*
+mejoras*
 
 # carpetas ocultas
 /.claude/
@@ -80,4 +81,3 @@ release/
 /electron/*.js.map
 /lib/data/reminders.js
 /lib/data/reminders.js.map
-
