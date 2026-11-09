@@ -22,7 +22,11 @@ export const metadata: Metadata = {
   description: "Personal planner estilo IBM/Lotus Organizer",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const language = await getLanguage();
 
   return (
