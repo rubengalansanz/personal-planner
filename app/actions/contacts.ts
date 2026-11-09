@@ -17,6 +17,7 @@ function parseContact(fd: FormData) {
     telWork: strOrNull(fd.get("telWork")),
     telMobile: strOrNull(fd.get("telMobile")),
     telFax: strOrNull(fd.get("telFax")),
+    telegram: strOrNull(fd.get("telegram")),
     email: strOrNull(fd.get("email")),
     addressHome: strOrNull(fd.get("addressHome")),
     addressWork: strOrNull(fd.get("addressWork")),

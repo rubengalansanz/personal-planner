@@ -9,6 +9,7 @@ import {
   PageHeader,
   EntityDialog,
   DeleteButton,
+  ColumnVisibility,
   Table,
   Th,
   Td,
@@ -99,28 +100,38 @@ export default async function CumpleanosPage() {
         {sorted.length === 0 ? (
           <EmptyState>{t("birthdays.empty")}</EmptyState>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>{t("birthdays.name")}</Th>
-                <Th>{t("birthdays.type")}</Th>
-                <Th>{t("birthdays.upcoming")}</Th>
-                <Th>{t("birthdays.when")}</Th>
-                <Th />
-              </tr>
-            </thead>
+          <ColumnVisibility
+            storageKey="birthdays:columns"
+            columns={[
+              { key: "name", label: t("birthdays.name") },
+              { key: "type", label: t("birthdays.type") },
+              { key: "upcoming", label: t("birthdays.upcoming") },
+              { key: "when", label: t("birthdays.when") },
+              { key: "actions", label: t("common.actions") },
+            ]}
+          >
+            <Table>
+              <thead>
+                <tr>
+                  <Th data-col="name">{t("birthdays.name")}</Th>
+                  <Th data-col="type">{t("birthdays.type")}</Th>
+                  <Th data-col="upcoming">{t("birthdays.upcoming")}</Th>
+                  <Th data-col="when">{t("birthdays.when")}</Th>
+                  <Th data-col="actions" />
+                </tr>
+              </thead>
             <tbody>
               {sorted.map((a) => (
                 <tr key={a.id}>
-                  <Td>{a.name}</Td>
-                  <Td>
+                  <Td data-col="name">{a.name}</Td>
+                  <Td data-col="type">
                     <Badge tone={TYPE_TONE[a.type]}>
                       {t(`birthdays.types.${a.type}`)}
                     </Badge>
                   </Td>
-                  <Td>{fmt(a.nextDate, t)}</Td>
-                  <Td>{untilLabel(a.daysUntil, t)}</Td>
-                  <Td className="text-right">
+                  <Td data-col="upcoming">{fmt(a.nextDate, t)}</Td>
+                  <Td data-col="when">{untilLabel(a.daysUntil, t)}</Td>
+                  <Td data-col="actions" className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
                         title={t("birthdays.editItem")}
@@ -145,6 +156,7 @@ export default async function CumpleanosPage() {
               ))}
             </tbody>
           </Table>
+          </ColumnVisibility>
         )}
       </div>
       {contactBirthdays.length > 0 && (

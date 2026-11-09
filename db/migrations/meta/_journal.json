@@ -8,6 +8,13 @@
       "when": 1787150295962,
       "tag": "0000_rapid_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794243283875,
+      "tag": "0001_complete_otto_octavius",
+      "breakpoints": true
     }
   ]
 }

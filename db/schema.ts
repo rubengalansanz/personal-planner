@@ -76,6 +76,7 @@ export const contacts = sqliteTable(
     telWork: text("tel_work"),
     telMobile: text("tel_mobile"),
     telFax: text("tel_fax"),
+    telegram: text("telegram"),
     email: text("email"),
     addressHome: text("address_home"),
     addressWork: text("address_work"),

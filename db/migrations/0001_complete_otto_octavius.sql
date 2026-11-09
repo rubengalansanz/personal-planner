@@ -1,0 +1,1 @@
+ALTER TABLE `contacts` ADD `telegram` text;

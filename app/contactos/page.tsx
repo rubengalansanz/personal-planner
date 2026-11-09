@@ -9,6 +9,7 @@ import {
   PageHeader,
   EntityDialog,
   DeleteButton,
+  ColumnVisibility,
   Table,
   Th,
   Td,
@@ -43,6 +44,7 @@ function contactFields(t: Translator): FieldDef[] {
     { name: "telWork", label: t("contacts.telWork") },
     { name: "telMobile", label: t("contacts.telMobile") },
     { name: "telFax", label: t("contacts.telFax") },
+    { name: "telegram", label: t("contacts.telegram") },
     { name: "email", label: t("contacts.email") },
     { name: "birthday", label: t("contacts.birthday"), type: "date" },
     {
@@ -105,24 +107,80 @@ export default async function ContactosPage() {
         {contacts.length === 0 ? (
           <EmptyState>{t("contacts.empty")}</EmptyState>
         ) : (
-          <Table>
-            <thead>
+          <ColumnVisibility
+            storageKey="contacts:columns"
+            columns={[
+              { key: "name", label: t("contacts.firstName") },
+              { key: "company", label: t("contacts.company") },
+              { key: "email", label: t("contacts.email") },
+              { key: "mobile", label: t("contacts.telMobile") },
+              { key: "contact", label: t("contacts.contact") },
+              { key: "actions", label: t("common.actions") ?? "Acciones" },
+            ]}
+          >
+            <Table>
+              <thead>
               <tr>
-                <Th>{t("contacts.firstName")}</Th>
-                <Th>{t("contacts.company")}</Th>
-                <Th>{t("contacts.email")}</Th>
-                <Th>{t("contacts.telMobile")}</Th>
-                <Th />
+                <Th data-col="name">{t("contacts.firstName")}</Th>
+                <Th data-col="company">{t("contacts.company")}</Th>
+                <Th data-col="email">{t("contacts.email")}</Th>
+                <Th data-col="mobile">{t("contacts.telMobile")}</Th>
+                <Th data-col="contact">{t("contacts.contact")}</Th>
+                <Th data-col="actions" />
               </tr>
             </thead>
             <tbody>
               {contacts.map((c) => (
                 <tr key={c.id}>
-                  <Td>{fullName(c, t("common.unnamed"))}</Td>
-                  <Td>{c.company ?? "—"}</Td>
-                  <Td>{c.email ?? "—"}</Td>
-                  <Td>{c.telMobile ?? "—"}</Td>
-                  <Td className="text-right">
+                  <Td data-col="name">{fullName(c, t("common.unnamed"))}</Td>
+                  <Td data-col="company">{c.company ?? "—"}</Td>
+                  <Td data-col="email">{c.email ?? "—"}</Td>
+                  <Td data-col="mobile">
+                    {c.telMobile ? (
+                      <a
+                        href={`tel:${c.telMobile}`}
+                        className="text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        {c.telMobile}
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </Td>
+                  <Td data-col="contact">
+                    <div className="flex flex-wrap gap-1">
+                      {c.telMobile && (
+                        <a
+                          href={`https://wa.me/${c.telMobile.replace(/[^0-9]/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800 hover:bg-green-200 dark:bg-green-950 dark:text-green-300"
+                          title="WhatsApp"
+                        >
+                          WA
+                        </a>
+                      )}
+                      {(c.telegram || c.telMobile) && (
+                        <a
+                          href={
+                            c.telegram
+                              ? `https://t.me/${c.telegram.replace(/^@/, "")}`
+                              : `https://t.me/+${c.telMobile!.replace(/[^0-9]/g, "")}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 hover:bg-blue-200 dark:bg-blue-950 dark:text-blue-300"
+                          title="Telegram"
+                        >
+                          TG
+                        </a>
+                      )}
+                      {!c.telMobile && !c.telegram && (
+                        <span className="text-xs text-zinc-400">—</span>
+                      )}
+                    </div>
+                  </Td>
+                  <Td data-col="actions" className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
                         title={t("contacts.editContact")}
@@ -142,6 +200,7 @@ export default async function ContactosPage() {
               ))}
             </tbody>
           </Table>
+          </ColumnVisibility>
         )}
       </div>
     </>

@@ -9,6 +9,7 @@ import {
   PageHeader,
   EntityDialog,
   DeleteButton,
+  ColumnVisibility,
   Table,
   Th,
   Td,
@@ -91,23 +92,34 @@ export default async function TareasPage() {
         {tasks.length === 0 ? (
           <EmptyState>{t("tasks.empty")}</EmptyState>
         ) : (
-          <Table>
-            <thead>
+          <ColumnVisibility
+            storageKey="tasks:columns"
+            columns={[
+              { key: "title", label: t("tasks.titleField") },
+              { key: "dueDate", label: t("tasks.dueDate") },
+              { key: "priority", label: t("tasks.priority") },
+              { key: "status", label: t("tasks.status") },
+              { key: "category", label: t("tasks.category") },
+              { key: "actions", label: t("common.actions") },
+            ]}
+          >
+            <Table>
+              <thead>
               <tr>
-                <Th>{t("tasks.titleField")}</Th>
-                <Th>{t("tasks.dueDate")}</Th>
-                <Th>{t("tasks.priority")}</Th>
-                <Th>{t("tasks.status")}</Th>
-                <Th>{t("tasks.category")}</Th>
-                <Th />
+                <Th data-col="title">{t("tasks.titleField")}</Th>
+                <Th data-col="dueDate">{t("tasks.dueDate")}</Th>
+                <Th data-col="priority">{t("tasks.priority")}</Th>
+                <Th data-col="status">{t("tasks.status")}</Th>
+                <Th data-col="category">{t("tasks.category")}</Th>
+                <Th data-col="actions" />
               </tr>
             </thead>
             <tbody>
               {tasks.map((task) => (
                 <tr key={task.id}>
-                  <Td>{task.title}</Td>
-                  <Td>{task.dueDate ? isoToDate(task.dueDate) : "—"}</Td>
-                  <Td>
+                  <Td data-col="title">{task.title}</Td>
+                  <Td data-col="dueDate">{task.dueDate ? isoToDate(task.dueDate) : "—"}</Td>
+                  <Td data-col="priority">
                     <Badge
                       tone={
                         task.priority === 1
@@ -120,13 +132,13 @@ export default async function TareasPage() {
                       {t(`tasks.priorities.${task.priority}`)}
                     </Badge>
                   </Td>
-                  <Td>
+                  <Td data-col="status">
                     {task.status === "done"
                       ? t("tasks.statuses.done")
                       : t("tasks.statuses.pending")}
                   </Td>
-                  <Td>{task.category}</Td>
-                  <Td className="text-right">
+                  <Td data-col="category">{task.category}</Td>
+                  <Td data-col="actions" className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
                         title={t("tasks.editTask")}
@@ -148,6 +160,7 @@ export default async function TareasPage() {
               ))}
             </tbody>
           </Table>
+          </ColumnVisibility>
         )}
       </div>
     </>

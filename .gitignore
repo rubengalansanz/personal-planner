@@ -84,3 +84,6 @@ release/
 /electron/*.js.map
 /lib/data/reminders.js
 /lib/data/reminders.js.map
+
+# carpeta de planeamiento
+/planning/

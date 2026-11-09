@@ -8,6 +8,7 @@ import {
   PageHeader,
   EntityDialog,
   DeleteButton,
+  ColumnVisibility,
   Button,
   Table,
   Th,
@@ -107,24 +108,33 @@ export default async function NotasPage({
         {notes.length === 0 ? (
           <EmptyState>{t("notes.empty")}</EmptyState>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>{t("notes.titleField")}</Th>
-                <Th>{t("notes.category")}</Th>
-                <Th>{t("notes.updated")}</Th>
-                <Th />
-              </tr>
-            </thead>
+          <ColumnVisibility
+            storageKey="notes:columns"
+            columns={[
+              { key: "title", label: t("notes.titleField") },
+              { key: "category", label: t("notes.category") },
+              { key: "updated", label: t("notes.updated") },
+              { key: "actions", label: t("common.actions") },
+            ]}
+          >
+            <Table>
+              <thead>
+                <tr>
+                  <Th data-col="title">{t("notes.titleField")}</Th>
+                  <Th data-col="category">{t("notes.category")}</Th>
+                  <Th data-col="updated">{t("notes.updated")}</Th>
+                  <Th data-col="actions" />
+                </tr>
+              </thead>
             <tbody>
               {notes.map((n) => (
                 <tr key={n.id}>
-                  <Td>{n.title}</Td>
-                  <Td>
+                  <Td data-col="title">{n.title}</Td>
+                  <Td data-col="category">
                     <Badge>{n.category}</Badge>
                   </Td>
-                  <Td>{n.updatedAt?.slice(0, 10)}</Td>
-                  <Td className="text-right">
+                  <Td data-col="updated">{n.updatedAt?.slice(0, 10)}</Td>
+                  <Td data-col="actions" className="text-right">
                     <div className="flex justify-end gap-2">
                       <EntityDialog
                         title={t("notes.editNote")}
@@ -144,6 +154,7 @@ export default async function NotasPage({
               ))}
             </tbody>
           </Table>
+          </ColumnVisibility>
         )}
       </div>
     </>
