@@ -1,22 +1,22 @@
 # Personal Planner
 
-Aplicación de agenda personal con calendario, tareas, contactos, notas y planner. Funciona como aplicación web y de escritorio (Electron).
+Aplicación de agenda personal con calendario, tareas, contactos, notas y planner. Funciona como aplicación web y de escritorio (Electron). Soporta 6 idiomas (es, en, de, fr, it, pt).
 
 ## Funcionalidades
 
-- **Calendario**: Eventos y citas con recordatorios
-- **Tareas**: Gestión de tareas pendientes con prioridades y categorías
-- **Contactos**: Agenda de contactos con múltiples teléfonos y direcciones
-- **Notas**: Bloc de notas con categorías
-- **Planner**: Gestión de proyectos con hitos y seguimiento de progreso
-- **Cumpleaños/Aniversarios**: Fechas recurrentes con recordatorios
-- **Enlaces**: Referencias cruzadas entre registros
-- **Notificaciones Push**: Recordatorios mediante Web Push
+- **Calendario**: Vista de día/semana/mes/año con citas, tareas, cumpleaños, proyectos, hitos del planner y notas. Edición inline, filtros por sección y recordatorios.
+- **Tareas**: Gestión con prioridades, categorías, fechas y estados.
+- **Contactos**: Agenda con múltiples teléfonos, direcciones, cumpleaños y enlaces cruzados.
+- **Notas**: Bloc de notas con categorías y búsqueda/ordenación.
+- **Planner**: Gestión de proyectos con hitos, progreso y fechas objetivo.
+- **Cumpleaños/Aniversarios**: Fechas recurrentes con recordatorios.
+- **Enlaces**: Referencias cruzadas entre registros (proyectos, tareas, notas, etc.).
+- **Notificaciones Push**: Recordatorios mediante Web Push.
 
 ## Stack Tecnológico
 
-- **Frontend**: Next.js 16.3.1, React 19.2.8, Tailwind CSS 4
-- **Backend**: Next.js API Routes
+- **Frontend**: Next.js 16.4.4, React 19.2.8, Tailwind CSS 4
+- **Backend**: Next.js API Routes / Server Actions
 - **Base de datos**: SQLite con Drizzle ORM
 - **Escritorio**: Electron 44
 - **Lenguaje**: TypeScript
@@ -41,6 +41,7 @@ npm run dev
 | `npm run build` | Construir la aplicación |
 | `npm run start` | Iniciar producción |
 | `npm run lint` | Verificar código con ESLint |
+| `npm run typecheck` | Verificar tipos con TypeScript |
 | `npm run db:generate` | Generar migraciones de Drizzle |
 | `npm run db:migrate` | Ejecutar migraciones |
 | `npm run db:push` | Push de esquema a la DB |
@@ -99,6 +100,7 @@ Usa SQLite con Drizzle ORM. El esquema está en `db/schema.ts` e incluye:
 ├── db/                   # Esquema y migraciones Drizzle
 ├── electron/             # Código de Electron
 ├── lib/                  # Utilidades compartidas
+├── planning/             # Planificación de versiones
 └── scripts/              # Scripts de utilidad
 ```
 
@@ -114,4 +116,10 @@ npm run electron:dev
 npm run electron:dist
 ```
 
-Soporta Linux (AppImage, deb), macOS (dmg) y Windows (NSIS).
+Soporta Linux (AppImage, deb, rpm), macOS (dmg) y Windows (NSIS, MSI).
+
+## CI/CD
+
+- **CI** (`.github/workflows/ci.yml`): lint, typecheck y build en cada push/PR.
+- **Release** (`.github/workflows/release.yml`): build para Windows/Linux/macOS y borrador de release al pushear un tag `v*`.
+- Artefactos con nombre consistente: `personal-planner-<version>-<os>-<arch>.<ext>`.

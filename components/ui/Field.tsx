@@ -18,7 +18,7 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+      className="mb-1 block text-left text-sm font-medium text-zinc-700 dark:text-zinc-300"
     >
       {children}
     </label>

@@ -57,7 +57,7 @@ export function Dialog({
             </svg>
           </button>
         </div>
-        <div className="overflow-y-auto p-4">{children}</div>
+        <div className="overflow-y-auto p-4 text-left">{children}</div>
       </div>
     </div>
   );
