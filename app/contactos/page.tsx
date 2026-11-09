@@ -11,6 +11,7 @@ import {
   DeleteButton,
   ColumnVisibility,
   TableSort,
+  ColumnReorder,
   Table,
   Th,
   Td,
@@ -120,8 +121,9 @@ export default async function ContactosPage() {
             ]}
           >
             <TableSort>
-              <Table>
-                <thead>
+              <ColumnReorder storageKey="contacts:column-order">
+                <Table>
+                  <thead>
               <tr>
                 <Th data-col="name" data-sort="name">{t("contacts.firstName")}</Th>
                 <Th data-col="company" data-sort="company">{t("contacts.company")}</Th>
@@ -213,6 +215,7 @@ export default async function ContactosPage() {
               ))}
             </tbody>
           </Table>
+              </ColumnReorder>
             </TableSort>
           </ColumnVisibility>
         )}

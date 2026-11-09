@@ -11,6 +11,7 @@ import {
   DeleteButton,
   ColumnVisibility,
   TableSort,
+  ColumnReorder,
   Table,
   Th,
   Td,
@@ -105,8 +106,9 @@ export default async function TareasPage() {
             ]}
           >
             <TableSort>
-              <Table>
-                <thead>
+              <ColumnReorder storageKey="tasks:column-order">
+                <Table>
+                  <thead>
               <tr>
                 <Th data-col="title" data-sort="title">{t("tasks.titleField")}</Th>
                 <Th data-col="dueDate" data-sort="dueDate">{t("tasks.dueDate")}</Th>
@@ -162,6 +164,7 @@ export default async function TareasPage() {
               ))}
             </tbody>
           </Table>
+              </ColumnReorder>
             </TableSort>
           </ColumnVisibility>
         )}

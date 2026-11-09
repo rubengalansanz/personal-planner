@@ -10,5 +10,6 @@ export { DeleteButton } from "./DeleteButton";
 export { ColumnPicker, useColumnVisibility, type ColumnDef } from "./ColumnPicker";
 export { ColumnVisibility } from "./ColumnVisibility";
 export { TableSort } from "./TableSort";
+export { ColumnReorder } from "./ColumnReorder";
 export type { FieldDef } from "./EntityDialog";
 export { PageHeader, EmptyState } from "./PageHeader";

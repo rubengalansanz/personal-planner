@@ -11,6 +11,7 @@ import {
   DeleteButton,
   ColumnVisibility,
   TableSort,
+  ColumnReorder,
   Table,
   Th,
   Td,
@@ -112,10 +113,11 @@ export default async function CumpleanosPage() {
             ]}
           >
             <TableSort>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th data-col="name" data-sort="name">{t("birthdays.name")}</Th>
+              <ColumnReorder storageKey="birthdays:column-order">
+                <Table>
+                  <thead>
+                    <tr>
+                      <Th data-col="name" data-sort="name">{t("birthdays.name")}</Th>
                     <Th data-col="type" data-sort="type">{t("birthdays.type")}</Th>
                     <Th data-col="upcoming" data-sort="upcoming">{t("birthdays.upcoming")}</Th>
                     <Th data-col="when" data-sort="when">{t("birthdays.when")}</Th>
@@ -158,6 +160,7 @@ export default async function CumpleanosPage() {
               ))}
             </tbody>
           </Table>
+              </ColumnReorder>
             </TableSort>
           </ColumnVisibility>
         )}

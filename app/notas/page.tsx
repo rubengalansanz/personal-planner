@@ -10,6 +10,7 @@ import {
   DeleteButton,
   ColumnVisibility,
   TableSort,
+  ColumnReorder,
   Button,
   Table,
   Th,
@@ -119,10 +120,11 @@ export default async function NotasPage({
             ]}
           >
             <TableSort>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th data-col="title" data-sort="title">{t("notes.titleField")}</Th>
+              <ColumnReorder storageKey="notes:column-order">
+                <Table>
+                  <thead>
+                    <tr>
+                      <Th data-col="title" data-sort="title">{t("notes.titleField")}</Th>
                     <Th data-col="category" data-sort="category">{t("notes.category")}</Th>
                     <Th data-col="updated" data-sort="updated">{t("notes.updated")}</Th>
                     <Th data-col="actions" />
@@ -156,6 +158,7 @@ export default async function NotasPage({
               ))}
             </tbody>
           </Table>
+              </ColumnReorder>
             </TableSort>
           </ColumnVisibility>
         )}
