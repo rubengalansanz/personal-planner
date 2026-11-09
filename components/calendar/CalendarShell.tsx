@@ -18,6 +18,15 @@ const LABELS: Record<string, string> = {
   notes: "notes.title",
 };
 
+const FILTER_COLORS: Record<string, string> = {
+  events: "bg-blue-500",
+  tasks: "bg-amber-500",
+  anniversaries: "bg-pink-500",
+  projects: "bg-emerald-500",
+  planner: "bg-teal-500",
+  notes: "bg-purple-500",
+};
+
 export function CalendarShell({
   calendar,
   sidebar,
@@ -69,6 +78,10 @@ export function CalendarShell({
                     className="h-4 w-4 rounded border-zinc-300"
                   />
                   {labelFor(k)}
+                  <span
+                    className={`ml-auto inline-block h-3 w-3 rounded-full ${FILTER_COLORS[k]}`}
+                    aria-hidden="true"
+                  />
                 </label>
               ))}
             </div>

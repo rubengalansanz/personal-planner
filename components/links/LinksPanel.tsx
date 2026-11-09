@@ -93,6 +93,7 @@ export function LinksPanel({
                 </a>
               </span>
               <Button
+                type="button"
                 variant="ghost"
                 className="px-2 py-1 text-xs"
                 onClick={() => onRemove(l.link.id)}
@@ -131,6 +132,7 @@ export function LinksPanel({
               >
                 <span className="truncate">{r.title}</span>
                 <Button
+                  type="button"
                   variant="secondary"
                   className="px-2 py-1 text-xs"
                   onClick={() => onAdd(r.id)}

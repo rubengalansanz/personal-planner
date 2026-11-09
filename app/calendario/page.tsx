@@ -111,20 +111,30 @@ export default async function CalendarioPage() {
                   tasks.map((task) => (
                     <div
                       key={task.id}
-                      className="flex items-center justify-between gap-2 text-sm"
+                      className="space-y-0.5 text-sm"
                     >
-                      <span className="truncate">{task.title}</span>
-                      <Badge
-                        tone={
-                          task.priority === 1
-                            ? "danger"
-                            : task.priority === 2
-                              ? "warning"
-                              : "neutral"
-                        }
-                      >
-                        {t(`tasks.priorities.${task.priority}`)}
-                      </Badge>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate">{task.title}</span>
+                        <Badge
+                          tone={
+                            task.priority === 1
+                              ? "danger"
+                              : task.priority === 2
+                                ? "warning"
+                                : "neutral"
+                          }
+                        >
+                          {t(`tasks.priorities.${task.priority}`)}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-3 text-xs text-zinc-500">
+                        {task.startDate && (
+                          <span>F.I.: {task.startDate.slice(5)}</span>
+                        )}
+                        {task.dueDate && (
+                          <span>F.V.: {task.dueDate.slice(5)}</span>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -142,12 +152,22 @@ export default async function CalendarioPage() {
                   planner.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-2 text-sm"
+                      className="space-y-1 text-sm"
                     >
-                      <span className="truncate">{item.title}</span>
-                      <span className="text-xs text-zinc-500">
-                        {item.dueDate?.slice(0, 10)}
-                      </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate">{item.title}</span>
+                        <span className="text-xs text-zinc-500">
+                          {item.dueDate?.slice(0, 10)}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-teal-400 to-emerald-500"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, item.progress ?? 0))}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   ))
                 )}

@@ -574,6 +574,7 @@ export function CalendarView({
                             fields={tFields}
                             values={taskValues(tk)}
                             onDelete={taskDeleteAction}
+                            extra={<LinksPanel sourceType="task" sourceId={tk.id} />}
                           />
                         ) : (
                           <span
@@ -598,6 +599,7 @@ export function CalendarView({
                             fields={aFields}
                             values={anniversaryValues(b)}
                             onDelete={anniversaryDeleteAction}
+                            extra={<LinksPanel sourceType="anniversary" sourceId={b.id} />}
                           />
                         ) : (
                           <span
@@ -622,6 +624,7 @@ export function CalendarView({
                             fields={pFields}
                             values={projectValues(p)}
                             onDelete={projectDeleteAction}
+                            extra={<LinksPanel sourceType="project" sourceId={p.id} />}
                           />
                         ) : (
                           <span
@@ -647,6 +650,7 @@ export function CalendarView({
                             values={plannerItemValues(it)}
                             hiddenValues={{ projectId: it.projectId }}
                             onDelete={plannerItemDeleteAction}
+                            extra={undefined}
                           />
                         ) : (
                           <span
@@ -671,6 +675,7 @@ export function CalendarView({
                             fields={nFields}
                             values={noteValues(n)}
                             onDelete={noteDeleteAction}
+                            extra={<LinksPanel sourceType="note" sourceId={n.id} />}
                           />
                         ) : (
                           <span
@@ -899,6 +904,7 @@ export function CalendarView({
                         fields={tFields}
                         values={taskValues(tk)}
                         onDelete={taskDeleteAction}
+                            extra={<LinksPanel sourceType="task" sourceId={tk.id} />}
                       />
                     ) : (
                       <span className="block rounded bg-amber-100 px-2 py-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-300">
@@ -930,6 +936,7 @@ export function CalendarView({
                         fields={aFields}
                         values={anniversaryValues(b)}
                         onDelete={anniversaryDeleteAction}
+                            extra={<LinksPanel sourceType="anniversary" sourceId={b.id} />}
                       />
                     ) : (
                       <span className="block rounded bg-pink-100 px-2 py-1 text-xs text-pink-800 dark:bg-pink-950 dark:text-pink-300">
@@ -961,6 +968,7 @@ export function CalendarView({
                         fields={pFields}
                         values={projectValues(p)}
                         onDelete={projectDeleteAction}
+                            extra={<LinksPanel sourceType="project" sourceId={p.id} />}
                       />
                     ) : (
                       <span className="block rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -993,6 +1001,7 @@ export function CalendarView({
                         values={plannerItemValues(it)}
                         hiddenValues={{ projectId: it.projectId }}
                         onDelete={plannerItemDeleteAction}
+                            extra={undefined}
                       />
                     ) : (
                       <span className="block rounded bg-teal-100 px-2 py-1 text-xs text-teal-800 dark:bg-teal-950 dark:text-teal-300">
@@ -1024,6 +1033,7 @@ export function CalendarView({
                         fields={nFields}
                         values={noteValues(n)}
                         onDelete={noteDeleteAction}
+                            extra={<LinksPanel sourceType="note" sourceId={n.id} />}
                       />
                     ) : (
                       <span className="block rounded bg-purple-100 px-2 py-1 text-xs text-purple-800 dark:bg-purple-950 dark:text-purple-300">

@@ -134,7 +134,18 @@ export default async function ContactosPage() {
                 <tr key={c.id}>
                   <Td data-col="name">{fullName(c, t("common.unnamed"))}</Td>
                   <Td data-col="company">{c.company ?? "—"}</Td>
-                  <Td data-col="email">{c.email ?? "—"}</Td>
+                  <Td data-col="email">
+                    {c.email ? (
+                      <a
+                        href={`mailto:${c.email}`}
+                        className="text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        {c.email}
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </Td>
                   <Td data-col="mobile">
                     {c.telMobile ? (
                       <a
