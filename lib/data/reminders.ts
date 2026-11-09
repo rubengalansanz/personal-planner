@@ -1,7 +1,7 @@
 import { isNotNull } from "drizzle-orm";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
-import { events, anniversaries } from "@/db/schema";
+import { events, anniversaries, contacts } from "@/db/schema";
 import { parseMonthDay } from "@/lib/anniversary-date";
 
 export type ReminderSource =
@@ -14,6 +14,13 @@ export type ReminderSource =
     }
   | {
       kind: "anniversary";
+      id: number;
+      title: string;
+      date: string;
+      reminderMin: number | null;
+    }
+  | {
+      kind: "contact";
       id: number;
       title: string;
       date: string;
@@ -43,6 +50,16 @@ export async function listReminderSources(): Promise<ReminderSource[]> {
     .from(anniversaries)
     .where(isNotNull(anniversaries.reminderMin));
 
+  const cons = await db
+    .select({
+      id: contacts.id,
+      firstName: contacts.firstName,
+      lastName: contacts.lastName,
+      birthday: contacts.birthday,
+    })
+    .from(contacts)
+    .where(isNotNull(contacts.birthday));
+
   return [
     ...evs.map((e) => ({
       kind: "event" as const,
@@ -58,11 +75,18 @@ export async function listReminderSources(): Promise<ReminderSource[]> {
       date: a.date,
       reminderMin: a.reminderMin,
     })),
+    ...cons.map((c) => ({
+      kind: "contact" as const,
+      id: c.id,
+      title: [c.firstName, c.lastName].filter(Boolean).join(" ") || "Contacto",
+      date: c.birthday as string,
+      reminderMin: 0,
+    })),
   ];
 }
 
 export type DueReminder = {
-  kind: "event" | "anniversary";
+  kind: "event" | "anniversary" | "contact";
   id: number;
   title: string;
   dueAt: Date;
@@ -82,11 +106,11 @@ function anniversaryDueAt(date: string, reminderMin: number | null): Date | null
   if (!md) return null;
   const now = new Date();
   const year = now.getFullYear();
-  let d = new Date(year, md.month - 1, md.day, 9, 0, 0, 0);
-  if (d.getMonth() !== md.month - 1 || d.getDate() !== md.day) return null;
+  // 29/02 en años no bisiestos: avisa el 28/02.
+  const day = md.month === 2 && md.day === 29 ? 28 : md.day;
+  let d = new Date(year, md.month - 1, day, 9, 0, 0, 0);
   if (d.getTime() < now.getTime()) {
-    d = new Date(year + 1, md.month - 1, md.day, 9, 0, 0, 0);
-    if (d.getMonth() !== md.month - 1 || d.getDate() !== md.day) return null;
+    d = new Date(year + 1, md.month - 1, day, 9, 0, 0, 0);
   }
   d.setMinutes(d.getMinutes() - reminderMin);
   return d;

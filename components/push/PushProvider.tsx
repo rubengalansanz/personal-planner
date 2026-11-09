@@ -48,6 +48,9 @@ export function PushProvider() {
     }
 
     let cancelled = false;
+    const fallback = setTimeout(() => {
+      if (!cancelled) setStatus("default");
+    }, 5000);
     navigator.serviceWorker
       .register("/sw.js")
       .then((reg) => navigator.serviceWorker.ready.then(() => reg))
@@ -66,9 +69,16 @@ export function PushProvider() {
             });
         }
         if (!cancelled) setStatus(perm as Status);
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("unsupported");
+      })
+      .finally(() => {
+        clearTimeout(fallback);
       });
     return () => {
       cancelled = true;
+      clearTimeout(fallback);
     };
   }, []);
 

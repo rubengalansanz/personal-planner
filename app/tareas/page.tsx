@@ -8,7 +8,7 @@ import { isoToDate } from "@/lib/datetime";
 import {
   PageHeader,
   EntityDialog,
-  Button,
+  DeleteButton,
   Table,
   Th,
   Td,
@@ -31,6 +31,7 @@ function taskFields(t: Translator): FieldDef[] {
       name: "priority",
       label: t("tasks.priority"),
       type: "select",
+      defaultValue: "2",
       options: [
         { value: "1", label: t("tasks.priorities.1") },
         { value: "2", label: t("tasks.priorities.2") },
@@ -138,11 +139,9 @@ export default async function TareasPage() {
                         }
                         onDelete={deleteTaskAction}
                       />
-                      <form action={deleteTaskAction.bind(null, task.id)}>
-                        <Button variant="danger" type="submit">
-                          {t("common.delete")}
-                        </Button>
-                      </form>
+                      <DeleteButton
+                        action={deleteTaskAction.bind(null, task.id)}
+                      />
                     </div>
                   </Td>
                 </tr>

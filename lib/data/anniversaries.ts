@@ -20,6 +20,7 @@ export function nextOccurrence(
 ): string | null {
   const md = parseMonthDay(date);
   if (!md) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
   for (const year of [from.getFullYear(), from.getFullYear() + 1]) {
     const candidate = new Date(year, md.month - 1, md.day, 0, 0, 0, 0);
     if (
@@ -27,8 +28,10 @@ export function nextOccurrence(
       candidate.getDate() !== md.day
     )
       continue;
-    if (candidate >= from && candidate <= to) {
-      return candidate.toISOString();
+    const fromMid = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    const toMid = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+    if (candidate >= fromMid && candidate <= toMid) {
+      return `${candidate.getFullYear()}-${pad(candidate.getMonth() + 1)}-${pad(candidate.getDate())}`;
     }
   }
   return null;
@@ -40,19 +43,20 @@ export async function listAnniversaries(): Promise<AnniversaryRow[]> {
 }
 
 export async function listUpcomingAnniversaries(
-  fromIso: string,
-  toIso: string,
+  from: Date,
+  to: Date,
 ): Promise<UpcomingAnniversary[]> {
   await connection();
   const all = await db.select().from(anniversaries).orderBy(asc(anniversaries.date));
-  const from = new Date(fromIso);
-  const to = new Date(toIso);
+  const fromMid = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const toMid = new Date(to.getFullYear(), to.getMonth(), to.getDate());
   const out: UpcomingAnniversary[] = [];
   for (const a of all) {
-    const next = nextOccurrence(a.date, from, to);
+    const next = nextOccurrence(a.date, fromMid, toMid);
     if (next) {
-      const daysUntil = Math.ceil(
-        (new Date(next).getTime() - from.getTime()) / 86400000,
+      const nextMid = new Date(next + "T00:00:00");
+      const daysUntil = Math.round(
+        (nextMid.getTime() - fromMid.getTime()) / 86400000,
       );
       out.push({ ...a, nextDate: next, daysUntil });
     }
@@ -66,7 +70,7 @@ export async function listAnniversariesWithNext(
 ): Promise<UpcomingAnniversary[]> {
   const from = new Date();
   const to = new Date(Date.now() + days * 86400000);
-  return listUpcomingAnniversaries(from.toISOString(), to.toISOString());
+  return listUpcomingAnniversaries(from, to);
 }
 
 export async function getAnniversary(
@@ -103,5 +107,7 @@ export async function updateAnniversary(
 
 export async function removeAnniversary(id: number): Promise<void> {
   await connection();
+  const { removeLinksFor } = await import("./links");
+  await removeLinksFor("anniversary", id);
   await db.delete(anniversaries).where(eq(anniversaries.id, id));
 }

@@ -47,5 +47,7 @@ export async function updateTask(
 
 export async function removeTask(id: number): Promise<void> {
   await connection();
+  const { removeLinksFor } = await import("./links");
+  await removeLinksFor("task", id);
   await db.delete(tasks).where(eq(tasks.id, id));
 }

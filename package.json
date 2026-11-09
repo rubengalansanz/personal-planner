@@ -1,6 +1,6 @@
 {
   "name": "personal-planner",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Personal Planner de escritorio — calendario, tareas, contactos y notas",
   "author": {
     "name": "Rubén Galán",
@@ -32,9 +32,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@types/better-sqlite3": "^9.6.0",
     "better-sqlite3": "^13.0.3",
-    "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "next": "16.4.4",
     "node-cron": "^4.6.0",
@@ -51,24 +49,27 @@
     "concurrently": "^10.0.5",
     "electron": "^44.1.0",
     "electron-builder": "^26.15.3",
-    "electron-rebuild": "^3.2.9",
+    "@electron/rebuild": "^4.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wait-on": "^9.1.0"
+    "wait-on": "^9.1.0",
+    "@types/better-sqlite3": "^9.6.0",
+    "drizzle-kit": "^0.31.10"
   },
   "build": {
     "appId": "com.personal.planner",
     "productName": "Personal Planner",
+    "artifactName": "personal-planner-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"
     },
     "files": [
       "electron/**/*",
-      ".next/**/*",
+      ".next/standalone/**/*",
+      ".next/static/**/*",
       "public/**/*",
-      "next.config.ts",
       "package.json"
     ],
     "asarUnpack": [

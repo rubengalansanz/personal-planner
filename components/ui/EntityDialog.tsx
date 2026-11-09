@@ -25,6 +25,7 @@ export type FieldDef = {
     | "checkbox";
   options?: { value: string; label: string }[];
   required?: boolean;
+  defaultValue?: string;
 };
 
 type Values = Record<string, string | number | boolean | null>;
@@ -59,6 +60,7 @@ export function EntityDialog({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
   const [pending, start] = useTransition();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const toast = useToast();
   const { t } = useLanguage();
 
@@ -70,6 +72,29 @@ export function EntityDialog({
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    for (const f of fields) {
+      if (f.required) {
+        const v = fd.get(f.name);
+        if (typeof v !== "string" || v.trim() === "") {
+          toast(t("common.error") || "Error");
+          return;
+        }
+      }
+    }
+    // Validación de fechas para citas: fin posterior a inicio
+    const startAt = fd.get("startAt");
+    const endAt = fd.get("endAt");
+    if (
+      typeof startAt === "string" &&
+      typeof endAt === "string" &&
+      startAt.trim() &&
+      endAt.trim()
+    ) {
+      if (new Date(endAt) <= new Date(startAt)) {
+        toast(t("common.error") || "Error");
+        return;
+      }
+    }
     start(async () => {
       await action(fd);
       setOpen(false);
@@ -79,8 +104,14 @@ export function EntityDialog({
 
   const onDeleteClick = () => {
     if (values?.id == null) return;
+    setConfirmOpen(true);
+  };
+
+  const onConfirmDelete = () => {
+    if (values?.id == null) return;
     start(async () => {
       await onDelete?.(Number(values.id));
+      setConfirmOpen(false);
       setOpen(false);
       toast(t("common.deleted"));
     });
@@ -138,6 +169,35 @@ export function EntityDialog({
           </div>
         </form>
       </Dialog>
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={t("common.deleteConfirm") || "¿Eliminar?"}
+      >
+        <div className="space-y-4">
+          <p className="text-left text-sm text-zinc-600 dark:text-zinc-300">
+            {t("common.deleteConfirm") || "¿Eliminar?"}
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="danger"
+              disabled={pending}
+              onClick={onConfirmDelete}
+            >
+              {t("common.delete")}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setConfirmOpen(false)}
+              disabled={pending}
+            >
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </>
   );
 }
@@ -180,7 +240,13 @@ function FieldRenderer({
         <Select
           id={id}
           name={field.name}
-          defaultValue={value != null ? String(value) : ""}
+          defaultValue={
+            value != null
+              ? String(value)
+              : field.defaultValue != null
+                ? String(field.defaultValue)
+                : ""
+          }
         >
           {field.options?.map((o) => (
             <option key={o.value} value={o.value}>

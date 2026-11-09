@@ -1,19 +1,46 @@
-import { BrowserWindow, Notification } from "electron";
+import { app, BrowserWindow, Notification } from "electron";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 const POLL_INTERVAL = 30_000;
-const PORT = 3456;
+let PORT = 3456;
 const notifiedKeys = new Set<string>();
 let intervalId: ReturnType<typeof setInterval> | null = null;
+
+function storePath(): string {
+  return path.join(app.getPath("userData"), "notified-reminders.json");
+}
+
+function loadNotified(): void {
+  try {
+    const raw = fs.readFileSync(storePath(), "utf8");
+    const arr = JSON.parse(raw) as string[];
+    for (const k of arr) {
+      notifiedKeys.add(k);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+function saveNotified(): void {
+  try {
+    fs.writeFileSync(storePath(), JSON.stringify([...notifiedKeys]), "utf8");
+  } catch {
+    // ignore
+  }
+}
 
 interface DueReminder {
   kind: "event" | "anniversary";
   id: number;
   title: string;
+  dueAt: string;
 }
 
 async function fetchDueReminders(): Promise<DueReminder[]> {
   try {
-    const res = await fetch(`http://localhost:${PORT}/api/electron/reminders`);
+    const res = await fetch(`http://127.0.0.1:${PORT}/api/electron/reminders`);
     if (!res.ok) return [];
     return (await res.json()) as DueReminder[];
   } catch {
@@ -21,8 +48,10 @@ async function fetchDueReminders(): Promise<DueReminder[]> {
   }
 }
 
-export function setupNotifications(mainWindow: BrowserWindow | null): void {
+export function setupNotifications(mainWindow: BrowserWindow | null, port?: number): void {
+  if (port) PORT = port;
   if (!mainWindow) return;
+  loadNotified();
 
   const tick = async () => {
     if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -51,6 +80,7 @@ export function setupNotifications(mainWindow: BrowserWindow | null): void {
           notification.show();
         }
       }
+      saveNotified();
     } catch (err) {
       console.error("Notification poll error:", err);
     }
@@ -65,5 +95,6 @@ export function stopNotifications(): void {
     clearInterval(intervalId);
     intervalId = null;
   }
+  saveNotified();
   notifiedKeys.clear();
 }

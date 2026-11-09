@@ -204,7 +204,7 @@ export default async function PlannerPage() {
                 />
                 <CardBody className="space-y-3">
                   {items.length === 0 ? (
-                    <p className="text-sm text-zinc-500">
+                    <div className="text-sm text-zinc-500">
                       {t("planner.noItems")}{" "}
                       <EntityDialog
                         title={t("planner.newItem")}
@@ -214,7 +214,7 @@ export default async function PlannerPage() {
                         hiddenValues={{ projectId: project.id }}
                         triggerClassName="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
                       />
-                    </p>
+                    </div>
                   ) : (
                     <ul className="space-y-2">
                       {[...items]

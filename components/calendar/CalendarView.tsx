@@ -4,9 +4,18 @@ import { useMemo, useState } from "react";
 import { Dialog, EntityDialog, type FieldDef } from "@/components/ui";
 import { LinksPanel } from "@/components/links/LinksPanel";
 import { useLanguage } from "@/components/LanguageProvider";
+import { useCalendarFilters } from "./CalendarFilterContext";
 import type { Translator } from "@/lib/i18n";
-import type { EventRow } from "@/db/schema";
-import { isoToDatetimeLocal } from "@/lib/datetime";
+import type {
+  EventRow,
+  TaskRow,
+  AnniversaryRow,
+  ProjectRow,
+  NoteRow,
+  PlannerItemRow,
+} from "@/db/schema";
+import { isoToDatetimeLocal, isoToDate } from "@/lib/datetime";
+import { parseMonthDay } from "@/lib/anniversary-date";
 
 function eventFields(t: Translator): FieldDef[] {
   return [
@@ -47,25 +56,220 @@ function eventValues(e: EventRow) {
   };
 }
 
+function taskFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("tasks.titleField"), required: true },
+    { name: "notes", label: t("tasks.notesField"), type: "textarea" },
+    { name: "startDate", label: t("tasks.startDate"), type: "date" },
+    { name: "dueDate", label: t("tasks.dueDate"), type: "date" },
+    {
+      name: "priority",
+      label: t("tasks.priority"),
+      type: "select",
+      defaultValue: "2",
+      options: [
+        { value: "1", label: t("tasks.priorities.1") },
+        { value: "2", label: t("tasks.priorities.2") },
+        { value: "3", label: t("tasks.priorities.3") },
+      ],
+    },
+    {
+      name: "status",
+      label: t("tasks.status"),
+      type: "select",
+      options: [
+        { value: "pending", label: t("tasks.statuses.pending") },
+        { value: "done", label: t("tasks.statuses.done") },
+      ],
+    },
+    { name: "category", label: t("tasks.category") },
+  ];
+}
+function taskValues(task: TaskRow) {
+  return {
+    id: task.id,
+    title: task.title,
+    notes: task.notes,
+    startDate: isoToDate(task.startDate),
+    dueDate: isoToDate(task.dueDate),
+    priority: task.priority,
+    status: task.status,
+    category: task.category,
+  };
+}
+
+function anniversaryFields(t: Translator): FieldDef[] {
+  return [
+    { name: "name", label: t("birthdays.name"), required: true },
+    { name: "date", label: t("birthdays.date"), type: "date", required: true },
+    {
+      name: "type",
+      label: t("birthdays.type"),
+      type: "select",
+      options: [
+        { value: "birthday", label: t("birthdays.types.birthday") },
+        { value: "anniversary", label: t("birthdays.types.anniversary") },
+        { value: "other", label: t("birthdays.types.other") },
+      ],
+    },
+    { name: "reminderMin", label: t("birthdays.reminder"), type: "number" },
+  ];
+}
+function anniversaryValues(a: AnniversaryRow) {
+  return {
+    id: a.id,
+    name: a.name,
+    date: isoToDate(a.date),
+    type: a.type,
+    reminderMin: a.reminderMin,
+  };
+}
+
+function projectFields(t: Translator): FieldDef[] {
+  return [
+    { name: "name", label: t("planner.name"), required: true },
+    { name: "description", label: t("planner.descriptionField"), type: "textarea" },
+    { name: "startDate", label: t("planner.startDate"), type: "date" },
+    { name: "targetDate", label: t("planner.targetDate"), type: "date" },
+    {
+      name: "status",
+      label: t("planner.status"),
+      type: "select",
+      options: [
+        { value: "planning", label: t("planner.statuses.planning") },
+        { value: "active", label: t("planner.statuses.active") },
+        { value: "done", label: t("planner.statuses.done") },
+        { value: "archived", label: t("planner.statuses.archived") },
+      ],
+    },
+    { name: "color", label: t("planner.color") },
+  ];
+}
+function projectValues(p: ProjectRow) {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    startDate: isoToDate(p.startDate),
+    targetDate: isoToDate(p.targetDate),
+    status: p.status,
+    color: p.color,
+  };
+}
+
+function plannerItemFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("planner.itemTitle"), required: true },
+    { name: "startDate", label: t("planner.startDate"), type: "date" },
+    { name: "dueDate", label: t("planner.targetDate"), type: "date" },
+    {
+      name: "status",
+      label: t("planner.status"),
+      type: "select",
+      options: [
+        { value: "todo", label: t("planner.itemStatuses.todo") },
+        { value: "in_progress", label: t("planner.itemStatuses.in_progress") },
+        { value: "done", label: t("planner.itemStatuses.done") },
+      ],
+    },
+    { name: "progress", label: t("planner.progress"), type: "number" },
+    {
+      name: "priority",
+      label: t("planner.priority"),
+      type: "select",
+      options: [
+        { value: "1", label: t("tasks.priorities.1") },
+        { value: "2", label: t("tasks.priorities.2") },
+        { value: "3", label: t("tasks.priorities.3") },
+      ],
+    },
+    { name: "notes", label: t("planner.notes"), type: "textarea" },
+  ];
+}
+function plannerItemValues(it: PlannerItemRow) {
+  return {
+    id: it.id,
+    title: it.title,
+    startDate: isoToDate(it.startDate),
+    dueDate: isoToDate(it.dueDate),
+    status: it.status,
+    progress: it.progress,
+    priority: it.priority,
+    notes: it.notes,
+  };
+}
+
+function noteFields(t: Translator): FieldDef[] {
+  return [
+    { name: "title", label: t("notes.titleField"), required: true },
+    { name: "content", label: t("notes.contentField"), type: "textarea" },
+    { name: "category", label: t("notes.category") },
+  ];
+}
+function noteValues(n: NoteRow) {
+  return {
+    id: n.id,
+    title: n.title,
+    content: n.content,
+    category: n.category,
+  };
+}
+
 type View = "day" | "week" | "month" | "year";
 
 export function CalendarView({
   events,
+  tasks = [],
+  anniversaries = [],
+  projects = [],
+  notes = [],
+  plannerItems = [],
   createAction,
   updateAction,
   deleteAction,
+  taskUpdateAction,
+  taskDeleteAction,
+  anniversaryUpdateAction,
+  anniversaryDeleteAction,
+  projectUpdateAction,
+  projectDeleteAction,
+  plannerItemUpdateAction,
+  plannerItemDeleteAction,
+  noteUpdateAction,
+  noteDeleteAction,
 }: {
   events: EventRow[];
+  tasks?: TaskRow[];
+  anniversaries?: AnniversaryRow[];
+  projects?: ProjectRow[];
+  notes?: NoteRow[];
+  plannerItems?: PlannerItemRow[];
   createAction: (fd: FormData) => void | Promise<void>;
   updateAction: (fd: FormData) => void | Promise<void>;
   deleteAction: (id: number) => void | Promise<void>;
+  taskUpdateAction?: (fd: FormData) => void | Promise<void>;
+  taskDeleteAction?: (id: number) => void | Promise<void>;
+  anniversaryUpdateAction?: (fd: FormData) => void | Promise<void>;
+  anniversaryDeleteAction?: (id: number) => void | Promise<void>;
+  projectUpdateAction?: (fd: FormData) => void | Promise<void>;
+  projectDeleteAction?: (id: number) => void | Promise<void>;
+  plannerItemUpdateAction?: (fd: FormData) => void | Promise<void>;
+  plannerItemDeleteAction?: (id: number) => void | Promise<void>;
+  noteUpdateAction?: (fd: FormData) => void | Promise<void>;
+  noteDeleteAction?: (id: number) => void | Promise<void>;
 }) {
   const { t } = useLanguage();
+  const { filters } = useCalendarFilters();
   const tv = (key: string, fallback: string) => {
     const v = t(key);
     return v === key ? fallback : v;
   };
   const fields = eventFields(t);
+  const tFields = taskFields(t);
+  const aFields = anniversaryFields(t);
+  const pFields = projectFields(t);
+  const piFields = plannerItemFields(t);
+  const nFields = noteFields(t);
   const today = new Date();
   const [view, setView] = useState<View>("month");
   const [year, setYear] = useState(today.getFullYear());
@@ -85,6 +289,64 @@ export function CalendarView({
     }
     return map;
   }, [events]);
+
+  const tasksByDate = useMemo(() => {
+    const map = new Map<string, TaskRow[]>();
+    for (const t of tasks) {
+      if (!t.dueDate) continue;
+      const key = t.dueDate.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
+    }
+    return map;
+  }, [tasks]);
+
+  const birthdaysByDate = useMemo(() => {
+    const map = new Map<string, AnniversaryRow[]>();
+    for (const a of anniversaries) {
+      const md = parseMonthDay(a.date);
+      if (!md) continue;
+      // show on the matching day of the displayed month/year
+      const key = `${year}-${pad(month + 1)}-${pad(md.day)}`;
+      if (md.month !== month + 1) continue;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(a);
+    }
+    return map;
+  }, [anniversaries, year, month]);
+
+  const projectsByDate = useMemo(() => {
+    const map = new Map<string, ProjectRow[]>();
+    for (const p of projects) {
+      if (!p.targetDate) continue;
+      const key = p.targetDate.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(p);
+    }
+    return map;
+  }, [projects]);
+
+  const notesByDate = useMemo(() => {
+    const map = new Map<string, NoteRow[]>();
+    for (const n of notes) {
+      if (!n.updatedAt) continue;
+      const key = n.updatedAt.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(n);
+    }
+    return map;
+  }, [notes]);
+
+  const plannerByDate = useMemo(() => {
+    const map = new Map<string, PlannerItemRow[]>();
+    for (const it of plannerItems) {
+      if (!it.dueDate) continue;
+      const key = it.dueDate.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(it);
+    }
+    return map;
+  }, [plannerItems]);
 
   const todayKey = ymd(today);
 
@@ -279,9 +541,10 @@ export function CalendarView({
                       }}
                     />
                     <div className="mt-1 flex-1 space-y-1 overflow-hidden">
-                      {dayEvents.slice(0, 2).map((e) => (
+                      {filters.events &&
+                        dayEvents.slice(0, 2).map((e) => (
                         <EntityDialog
-                          key={e.id}
+                          key={`ev-${e.id}`}
                           title={t("calendar.editEvent")}
                           trigger={
                             <span className="block truncate rounded bg-blue-100 px-1 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-300">
@@ -297,6 +560,127 @@ export function CalendarView({
                           onDelete={deleteAction}
                         />
                       ))}
+                      {filters.tasks && (tasksByDate.get(key) ?? []).slice(0, 2).map((tk) =>
+                        taskUpdateAction ? (
+                          <EntityDialog
+                            key={`task-${tk.id}`}
+                            title={t("tasks.editTask")}
+                            trigger={
+                              <span className="block truncate rounded bg-amber-100 px-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                {tk.title}
+                              </span>
+                            }
+                            action={taskUpdateAction}
+                            fields={tFields}
+                            values={taskValues(tk)}
+                            onDelete={taskDeleteAction}
+                          />
+                        ) : (
+                          <span
+                            key={`task-${tk.id}`}
+                            className="block truncate rounded bg-amber-100 px-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                          >
+                            {tk.title}
+                          </span>
+                        ),
+                      )}
+                      {filters.anniversaries && (birthdaysByDate.get(key) ?? []).slice(0, 2).map((b) =>
+                        anniversaryUpdateAction ? (
+                          <EntityDialog
+                            key={`bd-${b.id}`}
+                            title={t("birthdays.editItem")}
+                            trigger={
+                              <span className="block truncate rounded bg-pink-100 px-1 text-xs text-pink-800 dark:bg-pink-950 dark:text-pink-300">
+                                {b.name}
+                              </span>
+                            }
+                            action={anniversaryUpdateAction}
+                            fields={aFields}
+                            values={anniversaryValues(b)}
+                            onDelete={anniversaryDeleteAction}
+                          />
+                        ) : (
+                          <span
+                            key={`bd-${b.id}`}
+                            className="block truncate rounded bg-pink-100 px-1 text-xs text-pink-800 dark:bg-pink-950 dark:text-pink-300"
+                          >
+                            {b.name}
+                          </span>
+                        ),
+                      )}
+                      {filters.projects && (projectsByDate.get(key) ?? []).slice(0, 2).map((p) =>
+                        projectUpdateAction ? (
+                          <EntityDialog
+                            key={`proj-${p.id}`}
+                            title={t("planner.editProject")}
+                            trigger={
+                              <span className="block truncate rounded bg-emerald-100 px-1 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                                {p.name}
+                              </span>
+                            }
+                            action={projectUpdateAction}
+                            fields={pFields}
+                            values={projectValues(p)}
+                            onDelete={projectDeleteAction}
+                          />
+                        ) : (
+                          <span
+                            key={`proj-${p.id}`}
+                            className="block truncate rounded bg-emerald-100 px-1 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                          >
+                            {p.name}
+                          </span>
+                        ),
+                      )}
+                      {filters.planner && (plannerByDate.get(key) ?? []).slice(0, 2).map((it) =>
+                        plannerItemUpdateAction ? (
+                          <EntityDialog
+                            key={`pl-${it.id}`}
+                            title={t("planner.editItem")}
+                            trigger={
+                              <span className="block truncate rounded bg-teal-100 px-1 text-xs text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                                {it.title}
+                              </span>
+                            }
+                            action={plannerItemUpdateAction}
+                            fields={piFields}
+                            values={plannerItemValues(it)}
+                            hiddenValues={{ projectId: it.projectId }}
+                            onDelete={plannerItemDeleteAction}
+                          />
+                        ) : (
+                          <span
+                            key={`pl-${it.id}`}
+                            className="block truncate rounded bg-teal-100 px-1 text-xs text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+                          >
+                            {it.title}
+                          </span>
+                        ),
+                      )}
+                      {filters.notes && (notesByDate.get(key) ?? []).slice(0, 2).map((n) =>
+                        noteUpdateAction ? (
+                          <EntityDialog
+                            key={`note-${n.id}`}
+                            title={t("notes.editNote")}
+                            trigger={
+                              <span className="block truncate rounded bg-purple-100 px-1 text-xs text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                                {n.title}
+                              </span>
+                            }
+                            action={noteUpdateAction}
+                            fields={nFields}
+                            values={noteValues(n)}
+                            onDelete={noteDeleteAction}
+                          />
+                        ) : (
+                          <span
+                            key={`note-${n.id}`}
+                            className="block truncate rounded bg-purple-100 px-1 text-xs text-purple-800 dark:bg-purple-950 dark:text-purple-300"
+                          >
+                            {n.title}
+                          </span>
+                        ),
+                      )}
                       {dayEvents.length > 2 && (
                         <button
                           type="button"
@@ -332,7 +716,7 @@ export function CalendarView({
                   {t(`weekdays.${((d.getDay() + 6) % 7) + 1}`)} {d.getDate()}
                 </div>
                 <div className="space-y-1">
-                  {dayEvents.map((e) => (
+                  {filters.events && dayEvents.map((e) => (
                     <EntityDialog
                       key={e.id}
                       title={t("calendar.editEvent")}
@@ -473,7 +857,8 @@ export function CalendarView({
             />
           )}
           <ul className="space-y-2">
-            {detailEvents.map((e) => (
+            {filters.events &&
+              detailEvents.map((e) => (
               <li key={e.id}>
                 <EntityDialog
                   title={t("calendar.editEvent")}
@@ -494,6 +879,162 @@ export function CalendarView({
               </li>
             ))}
           </ul>
+          {filters.tasks && (tasksByDate.get(dayDetail ?? "") ?? []).length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                Tareas
+              </div>
+              <ul className="space-y-1">
+                {(tasksByDate.get(dayDetail ?? "") ?? []).map((tk) => (
+                  <li key={`task-${tk.id}`}>
+                    {taskUpdateAction ? (
+                      <EntityDialog
+                        title={t("tasks.editTask")}
+                        trigger={
+                          <span className="block rounded bg-amber-100 px-2 py-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                            {tk.title}
+                          </span>
+                        }
+                        action={taskUpdateAction}
+                        fields={tFields}
+                        values={taskValues(tk)}
+                        onDelete={taskDeleteAction}
+                      />
+                    ) : (
+                      <span className="block rounded bg-amber-100 px-2 py-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        {tk.title}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {filters.anniversaries && (birthdaysByDate.get(dayDetail ?? "") ?? []).length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 text-xs font-semibold text-pink-700 dark:text-pink-300">
+                Cumpleaños
+              </div>
+              <ul className="space-y-1">
+                {(birthdaysByDate.get(dayDetail ?? "") ?? []).map((b) => (
+                  <li key={`bd-${b.id}`}>
+                    {anniversaryUpdateAction ? (
+                      <EntityDialog
+                        title={t("birthdays.editItem")}
+                        trigger={
+                          <span className="block rounded bg-pink-100 px-2 py-1 text-xs text-pink-800 dark:bg-pink-950 dark:text-pink-300">
+                            {b.name}
+                          </span>
+                        }
+                        action={anniversaryUpdateAction}
+                        fields={aFields}
+                        values={anniversaryValues(b)}
+                        onDelete={anniversaryDeleteAction}
+                      />
+                    ) : (
+                      <span className="block rounded bg-pink-100 px-2 py-1 text-xs text-pink-800 dark:bg-pink-950 dark:text-pink-300">
+                        {b.name}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {filters.projects && (projectsByDate.get(dayDetail ?? "") ?? []).length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                Proyectos
+              </div>
+              <ul className="space-y-1">
+                {(projectsByDate.get(dayDetail ?? "") ?? []).map((p) => (
+                  <li key={`proj-${p.id}`}>
+                    {projectUpdateAction ? (
+                      <EntityDialog
+                        title={t("planner.editProject")}
+                        trigger={
+                          <span className="block rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            {p.name}
+                          </span>
+                        }
+                        action={projectUpdateAction}
+                        fields={pFields}
+                        values={projectValues(p)}
+                        onDelete={projectDeleteAction}
+                      />
+                    ) : (
+                      <span className="block rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        {p.name}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {filters.planner && (plannerByDate.get(dayDetail ?? "") ?? []).length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 text-xs font-semibold text-teal-700 dark:text-teal-300">
+                Hitos
+              </div>
+              <ul className="space-y-1">
+                {(plannerByDate.get(dayDetail ?? "") ?? []).map((it) => (
+                  <li key={`pl-${it.id}`}>
+                    {plannerItemUpdateAction ? (
+                      <EntityDialog
+                        title={t("planner.editItem")}
+                        trigger={
+                          <span className="block rounded bg-teal-100 px-2 py-1 text-xs text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                            {it.title}
+                          </span>
+                        }
+                        action={plannerItemUpdateAction}
+                        fields={piFields}
+                        values={plannerItemValues(it)}
+                        hiddenValues={{ projectId: it.projectId }}
+                        onDelete={plannerItemDeleteAction}
+                      />
+                    ) : (
+                      <span className="block rounded bg-teal-100 px-2 py-1 text-xs text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                        {it.title}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {filters.notes && (notesByDate.get(dayDetail ?? "") ?? []).length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 text-xs font-semibold text-purple-700 dark:text-purple-300">
+                Notas
+              </div>
+              <ul className="space-y-1">
+                {(notesByDate.get(dayDetail ?? "") ?? []).map((n) => (
+                  <li key={`note-${n.id}`}>
+                    {noteUpdateAction ? (
+                      <EntityDialog
+                        title={t("notes.editNote")}
+                        trigger={
+                          <span className="block rounded bg-purple-100 px-2 py-1 text-xs text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                            {n.title}
+                          </span>
+                        }
+                        action={noteUpdateAction}
+                        fields={nFields}
+                        values={noteValues(n)}
+                        onDelete={noteDeleteAction}
+                      />
+                    ) : (
+                      <span className="block rounded bg-purple-100 px-2 py-1 text-xs text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                        {n.title}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </Dialog>
     </div>

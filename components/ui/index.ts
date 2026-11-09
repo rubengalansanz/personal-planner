@@ -6,5 +6,6 @@ export { Badge } from "./Badge";
 export { Table, Th, Td } from "./Table";
 export { ToastProvider, useToast } from "./Toast";
 export { EntityDialog } from "./EntityDialog";
+export { DeleteButton } from "./DeleteButton";
 export type { FieldDef } from "./EntityDialog";
 export { PageHeader, EmptyState } from "./PageHeader";

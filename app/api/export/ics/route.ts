@@ -40,7 +40,7 @@ export async function GET(req: Request) {
   const type = new URL(req.url).searchParams.get("type");
   if (type !== null && !(TYPES as readonly string[]).includes(type)) {
     return NextResponse.json(
-      { error: `type inválido. Usá uno de: ${TYPES.join(", ")}` },
+      { error: `Tipo inválido. Usa uno de: ${TYPES.join(", ")}` },
       { status: 400 },
     );
   }

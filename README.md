@@ -59,7 +59,7 @@ sin esa variable devuelve 503. Variables en `.env.local` (no commitear):
 ```bash
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
-VAPID_SUBJECT=mailto:vos@ejemplo.com
+VAPID_SUBJECT=mailto:tu@ejemplo.com
 NOTIFY_SECRET=un-secreto-largo-azaroso
 ```
 

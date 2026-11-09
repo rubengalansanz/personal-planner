@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { notes, type NoteRow } from "@/db/schema";
@@ -10,17 +10,23 @@ export async function listNotes(
   sort: "title" | "category" | "updated" = "title",
 ): Promise<NoteRow[]> {
   await connection();
-  const orderBy =
-    sort === "category"
-      ? asc(notes.category)
-      : sort === "updated"
-        ? asc(notes.updatedAt)
-        : asc(notes.title);
-  return db
+  const rows = await db
     .select()
     .from(notes)
-    .where(category ? eq(notes.category, category) : undefined)
-    .orderBy(orderBy);
+    .where(category ? eq(notes.category, category) : undefined);
+  if (sort === "updated") {
+    return rows.sort((a, b) =>
+      (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""),
+    );
+  }
+  if (sort === "category") {
+    return rows.sort((a, b) =>
+      (a.category ?? "").localeCompare(b.category ?? "", "es"),
+    );
+  }
+  return rows.sort((a, b) =>
+    (a.title ?? "").localeCompare(b.title ?? "", "es", { sensitivity: "base" }),
+  );
 }
 
 export async function getNote(id: number): Promise<NoteRow | undefined> {
@@ -50,5 +56,7 @@ export async function updateNote(
 
 export async function removeNote(id: number): Promise<void> {
   await connection();
+  const { removeLinksFor } = await import("./links");
+  await removeLinksFor("note", id);
   await db.delete(notes).where(eq(notes.id, id));
 }

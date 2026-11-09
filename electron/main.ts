@@ -1,10 +1,13 @@
-import { app, BrowserWindow, shell, ipcMain, Notification } from "electron";
+import { app, BrowserWindow, shell, ipcMain, Notification, dialog } from "electron";
 import * as path from "path";
+import * as crypto from "crypto";
+import * as net from "net";
 import { spawn, type ChildProcess } from "child_process";
 import { setupNotifications } from "./notifications";
 
 const isDev = !app.isPackaged;
-const PORT = 3456;
+let PORT = 3456;
+const HEALTH_TOKEN = crypto.randomBytes(16).toString("hex");
 let mainWindow: BrowserWindow | null = null;
 let nextServer: ChildProcess | null = null;
 
@@ -12,12 +15,6 @@ function getProjectRoot(): string {
   return path.join(__dirname, "..");
 }
 
-/**
- * Directorio desde el que lanzar el servidor Next standalone.
- * En dev es la raíz del proyecto; empaquetado NO puede ser `..` de `__dirname`
- * (eso es el fichero `app.asar`, y spawn con cwd=fichero da ENOTDIR), sino
- * `app.asar.unpacked`, donde asarUnpack deja `.next/standalone/**` en disco.
- */
 function getServerDir(): string {
   if (!app.isPackaged) return getProjectRoot();
   return path.join(process.resourcesPath, "app.asar.unpacked");
@@ -27,7 +24,20 @@ function getDbPath(): string {
   return path.join(app.getPath("userData"), "agenda.db");
 }
 
-function waitForServer(url: string, timeoutMs = 30_000): Promise<void> {
+function getFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const srv = net.createServer();
+    srv.unref();
+    srv.on("error", reject);
+    srv.listen(0, "127.0.0.1", () => {
+      const addr = srv.address();
+      const port = typeof addr === "object" && addr ? addr.port : 0;
+      srv.close(() => resolve(port));
+    });
+  });
+}
+
+function waitForServer(url: string, token: string, timeoutMs = 30_000): Promise<void> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       clearInterval(check);
@@ -36,11 +46,14 @@ function waitForServer(url: string, timeoutMs = 30_000): Promise<void> {
 
     const check = setInterval(async () => {
       try {
-        const res = await fetch(url, { redirect: "manual" });
-        if (res.status > 0) {
-          clearTimeout(timeout);
-          clearInterval(check);
-          resolve();
+        const res = await fetch(`${url}/api/health`, { redirect: "manual" });
+        if (res.ok) {
+          const json = (await res.json()) as { token?: string };
+          if (json.token === token) {
+            clearTimeout(timeout);
+            clearInterval(check);
+            resolve();
+          }
         }
       } catch {
         // Server not ready yet
@@ -58,11 +71,13 @@ function startNextServer(): Promise<void> {
     const serverDir = getServerDir();
     const env: NodeJS.ProcessEnv = {
       ...process.env,
+      HOSTNAME: "127.0.0.1",
       PORT: String(PORT),
       DB_FILE: getDbPath(),
       MIGRATIONS_DIR: path.join(process.resourcesPath, "db", "migrations"),
       NODE_ENV: "production",
       ELECTRON_RUN_AS_NODE: "1",
+      ELECTRON_HEALTH_TOKEN: HEALTH_TOKEN,
     };
 
     const child = spawn(
@@ -76,9 +91,23 @@ function startNextServer(): Promise<void> {
     );
 
     nextServer = child;
-    child.on("error", reject);
+    child.on("error", (err) => {
+      reject(err);
+    });
+    child.on("exit", (code) => {
+      if (code !== 0 && code !== null) {
+        // Server died unexpectedly
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          dialog.showErrorBox(
+            "Personal Planner",
+            `El servidor interno se detuvo (código ${code}). La aplicación se cerrará.`,
+          );
+          app.quit();
+        }
+      }
+    });
 
-    waitForServer(`http://localhost:${PORT}`)
+    waitForServer(`http://127.0.0.1:${PORT}`, HEALTH_TOKEN)
       .then(resolve)
       .catch(reject);
   });
@@ -95,14 +124,21 @@ function createWindow(): void {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
 
-  mainWindow.loadURL(`http://localhost:${PORT}`);
+  mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        shell.openExternal(url);
+      }
+    } catch {
+      // ignore invalid urls
+    }
     return { action: "deny" };
   });
 
@@ -119,7 +155,14 @@ function stopNextServer(): void {
 }
 
 ipcMain.handle("open-external", (_, url: string) => {
-  shell.openExternal(url);
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      shell.openExternal(url);
+    }
+  } catch {
+    // ignore invalid urls
+  }
 });
 
 ipcMain.handle("get-database-path", () => {
@@ -140,19 +183,31 @@ ipcMain.handle("get-platform", () => {
   return process.platform;
 });
 
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+}
+
 app.whenReady().then(async () => {
   try {
-    await startNextServer();
+    if (!isDev) {
+      PORT = await getFreePort();
+      await startNextServer();
+    }
     createWindow();
-    setupNotifications(mainWindow);
-
-    app.on("activate", () => {
-      if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-      }
-    });
+    setupNotifications(mainWindow, PORT);
   } catch (err) {
-    console.error("Failed to start application:", err);
+    dialog.showErrorBox(
+      "Personal Planner",
+      `No se pudo iniciar la aplicación: ${err instanceof Error ? err.message : String(err)}`,
+    );
     app.quit();
   }
 });
@@ -161,6 +216,12 @@ app.on("window-all-closed", () => {
   stopNextServer();
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
 });
 

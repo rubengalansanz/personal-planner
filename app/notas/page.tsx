@@ -7,6 +7,7 @@ import {
 import {
   PageHeader,
   EntityDialog,
+  DeleteButton,
   Button,
   Table,
   Th,
@@ -136,11 +137,7 @@ export default async function NotasPage({
                         }
                         onDelete={deleteNoteAction}
                       />
-                      <form action={deleteNoteAction.bind(null, n.id)}>
-                        <Button variant="danger" type="submit">
-                          {t("common.delete")}
-                        </Button>
-                      </form>
+                      <DeleteButton action={deleteNoteAction.bind(null, n.id)} />
                     </div>
                   </Td>
                 </tr>

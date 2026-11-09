@@ -1,4 +1,4 @@
-import { asc, eq, like, or } from "drizzle-orm";
+import { asc, eq, isNotNull, like, or } from "drizzle-orm";
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { contacts, type ContactRow } from "@/db/schema";
@@ -57,5 +57,29 @@ export async function updateContact(
 
 export async function removeContact(id: number): Promise<void> {
   await connection();
+  const { removeLinksFor } = await import("./links");
+  await removeLinksFor("contact", id);
   await db.delete(contacts).where(eq(contacts.id, id));
+}
+
+export async function listContactBirthdays(): Promise<
+  { id: number; name: string; birthday: string }[]
+> {
+  await connection();
+  const rows = await db
+    .select({
+      id: contacts.id,
+      firstName: contacts.firstName,
+      lastName: contacts.lastName,
+      birthday: contacts.birthday,
+    })
+    .from(contacts)
+    .where(isNotNull(contacts.birthday));
+  return rows
+    .filter((r) => !!r.birthday)
+    .map((r) => ({
+      id: r.id,
+      name: [r.firstName, r.lastName].filter(Boolean).join(" ") || "Contacto",
+      birthday: r.birthday as string,
+    }));
 }

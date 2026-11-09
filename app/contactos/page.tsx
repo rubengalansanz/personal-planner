@@ -8,7 +8,7 @@ import { isoToDate } from "@/lib/datetime";
 import {
   PageHeader,
   EntityDialog,
-  Button,
+  DeleteButton,
   Table,
   Th,
   Td,
@@ -135,11 +135,7 @@ export default async function ContactosPage() {
                         }
                         onDelete={deleteContactAction}
                       />
-                      <form action={deleteContactAction.bind(null, c.id)}>
-                        <Button variant="danger" type="submit">
-                          {t("common.delete")}
-                        </Button>
-                      </form>
+                      <DeleteButton action={deleteContactAction.bind(null, c.id)} />
                     </div>
                   </Td>
                 </tr>

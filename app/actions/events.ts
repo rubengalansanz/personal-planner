@@ -19,7 +19,7 @@ function parseEvent(fd: FormData) {
 
 export async function createEventAction(fd: FormData) {
   const data = parseEvent(fd);
-  if (!data.title) return;
+  if (!data.title || !data.startAt || !data.endAt) return;
   await createEvent(data);
   revalidatePath("/calendario");
 }
@@ -28,7 +28,7 @@ export async function updateEventAction(fd: FormData) {
   const id = Number(fd.get("id"));
   if (!id) return;
   const data = parseEvent(fd);
-  if (!data.title) return;
+  if (!data.title || !data.startAt || !data.endAt) return;
   await updateEvent(id, data);
   revalidatePath("/calendario");
 }

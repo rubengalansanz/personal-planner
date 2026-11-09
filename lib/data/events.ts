@@ -42,5 +42,7 @@ export async function updateEvent(
 
 export async function removeEvent(id: number): Promise<void> {
   await connection();
+  const { removeLinksFor } = await import("./links");
+  await removeLinksFor("event", id);
   await db.delete(events).where(eq(events.id, id));
 }

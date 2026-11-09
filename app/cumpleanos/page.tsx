@@ -1,4 +1,4 @@
-import { listAnniversariesWithNext } from "@/lib/data";
+import { listAnniversariesWithNext, listContactBirthdays } from "@/lib/data";
 import {
   createAnniversaryAction,
   updateAnniversaryAction,
@@ -8,7 +8,7 @@ import { isoToDate } from "@/lib/datetime";
 import {
   PageHeader,
   EntityDialog,
-  Button,
+  DeleteButton,
   Table,
   Th,
   Td,
@@ -77,6 +77,7 @@ export default async function CumpleanosPage() {
   const t = await getTranslator();
   const items = await listAnniversariesWithNext();
   const sorted = [...items].sort((a, b) => a.daysUntil - b.daysUntil);
+  const contactBirthdays = await listContactBirthdays();
   const fields = annFields(t);
 
   return (
@@ -135,11 +136,9 @@ export default async function CumpleanosPage() {
                         }
                         onDelete={deleteAnniversaryAction}
                       />
-                      <form action={deleteAnniversaryAction.bind(null, a.id)}>
-                        <Button variant="danger" type="submit">
-                          {t("common.delete")}
-                        </Button>
-                      </form>
+                      <DeleteButton
+                        action={deleteAnniversaryAction.bind(null, a.id)}
+                      />
                     </div>
                   </Td>
                 </tr>
@@ -148,6 +147,29 @@ export default async function CumpleanosPage() {
           </Table>
         )}
       </div>
+      {contactBirthdays.length > 0 && (
+        <div className="p-4">
+          <h2 className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            {t("contacts.title")} · {t("contacts.birthday")}
+          </h2>
+          <Table>
+            <thead>
+              <tr>
+                <Th>{t("birthdays.name")}</Th>
+                <Th>{t("birthdays.when")}</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {contactBirthdays.map((c) => (
+                <tr key={`contact-${c.id}`}>
+                  <Td>{c.name}</Td>
+                  <Td>{isoToDate(c.birthday)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      )}
     </>
   );
 }

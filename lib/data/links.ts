@@ -113,6 +113,22 @@ export async function removeLink(id: number): Promise<void> {
   await db.delete(links).where(eq(links.id, id));
 }
 
+/** Elimina todos los enlaces que involucran a una entidad (huérfanos al borrar). */
+export async function removeLinksFor(
+  type: RecordType,
+  id: number,
+): Promise<void> {
+  await connection();
+  await db
+    .delete(links)
+    .where(
+      or(
+        and(eq(links.sourceType, type), eq(links.sourceId, id)),
+        and(eq(links.targetType, type), eq(links.targetId, id)),
+      ),
+    );
+}
+
 /** Busca registros de un tipo por texto (para el panel de enlaces). */
 export async function searchRecords(
   type: RecordType,
