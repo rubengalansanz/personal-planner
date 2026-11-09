@@ -21,6 +21,7 @@ export function useColumnVisibility(
       const raw = localStorage.getItem(storageKey);
       if (raw) {
         const parsed = JSON.parse(raw) as string[];
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setVisible(new Set(parsed));
       }
     } catch {

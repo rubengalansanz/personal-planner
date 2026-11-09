@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ColumnPicker, useColumnVisibility, type ColumnDef } from "./ColumnPicker";
 
 export function ColumnVisibility({
