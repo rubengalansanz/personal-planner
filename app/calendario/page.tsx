@@ -129,10 +129,14 @@ export default async function CalendarioPage() {
                       </div>
                       <div className="flex gap-3 text-xs text-zinc-500">
                         {task.startDate && (
-                          <span>F.I.: {task.startDate.slice(5)}</span>
+                          <span>
+                            {t("calendar.startShort")}: {task.startDate.slice(5)}
+                          </span>
                         )}
                         {task.dueDate && (
-                          <span>F.V.: {task.dueDate.slice(5)}</span>
+                          <span>
+                            {t("calendar.dueShort")}: {task.dueDate.slice(5)}
+                          </span>
                         )}
                       </div>
                     </div>
