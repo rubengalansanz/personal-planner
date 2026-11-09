@@ -10,6 +10,7 @@ import {
   EntityDialog,
   DeleteButton,
   ColumnVisibility,
+  TableSort,
   Table,
   Th,
   Td,
@@ -110,16 +111,17 @@ export default async function CumpleanosPage() {
               { key: "actions", label: t("common.actions") },
             ]}
           >
-            <Table>
-              <thead>
-                <tr>
-                  <Th data-col="name">{t("birthdays.name")}</Th>
-                  <Th data-col="type">{t("birthdays.type")}</Th>
-                  <Th data-col="upcoming">{t("birthdays.upcoming")}</Th>
-                  <Th data-col="when">{t("birthdays.when")}</Th>
-                  <Th data-col="actions" />
-                </tr>
-              </thead>
+            <TableSort>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th data-col="name" data-sort="name">{t("birthdays.name")}</Th>
+                    <Th data-col="type" data-sort="type">{t("birthdays.type")}</Th>
+                    <Th data-col="upcoming" data-sort="upcoming">{t("birthdays.upcoming")}</Th>
+                    <Th data-col="when" data-sort="when">{t("birthdays.when")}</Th>
+                    <Th data-col="actions" />
+                  </tr>
+                </thead>
             <tbody>
               {sorted.map((a) => (
                 <tr key={a.id}>
@@ -156,6 +158,7 @@ export default async function CumpleanosPage() {
               ))}
             </tbody>
           </Table>
+            </TableSort>
           </ColumnVisibility>
         )}
       </div>

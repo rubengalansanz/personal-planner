@@ -22,7 +22,8 @@ export type FieldDef = {
     | "datetime-local"
     | "number"
     | "select"
-    | "checkbox";
+    | "checkbox"
+    | "color";
   options?: { value: string; label: string }[];
   required?: boolean;
   defaultValue?: string;
@@ -202,6 +203,57 @@ export function EntityDialog({
   );
 }
 
+const COLOR_PRESETS = [
+  "#3b82f6",
+  "#ef4444",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4",
+  "#84cc16",
+];
+
+function ColorField({
+  id,
+  name,
+  value,
+}: {
+  id: string;
+  name: string;
+  value?: string | number | boolean | null;
+}) {
+  const [current, setCurrent] = useState(
+    value != null ? String(value) : COLOR_PRESETS[0],
+  );
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {COLOR_PRESETS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setCurrent(c)}
+            className={`h-7 w-7 rounded-full border-2 ${
+              current === c ? "border-zinc-900 dark:border-zinc-100" : "border-transparent"
+            }`}
+            style={{ backgroundColor: c }}
+            aria-label={c}
+          />
+        ))}
+      </div>
+      <input
+        id={id}
+        name={name}
+        type="color"
+        value={current}
+        onChange={(e) => setCurrent(e.target.value)}
+        className="h-9 w-16 cursor-pointer rounded border border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+      />
+    </div>
+  );
+}
+
 function FieldRenderer({
   field,
   value,
@@ -229,6 +281,15 @@ function FieldRenderer({
           name={field.name}
           defaultValue={value != null ? String(value) : ""}
         />
+      </div>
+    );
+  }
+
+  if (field.type === "color") {
+    return (
+      <div>
+        <Label htmlFor={id}>{field.label}</Label>
+        <ColorField id={id} name={field.name} value={value} />
       </div>
     );
   }

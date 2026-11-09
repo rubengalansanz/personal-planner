@@ -9,6 +9,7 @@ import {
   EntityDialog,
   DeleteButton,
   ColumnVisibility,
+  TableSort,
   Button,
   Table,
   Th,
@@ -117,15 +118,16 @@ export default async function NotasPage({
               { key: "actions", label: t("common.actions") },
             ]}
           >
-            <Table>
-              <thead>
-                <tr>
-                  <Th data-col="title">{t("notes.titleField")}</Th>
-                  <Th data-col="category">{t("notes.category")}</Th>
-                  <Th data-col="updated">{t("notes.updated")}</Th>
-                  <Th data-col="actions" />
-                </tr>
-              </thead>
+            <TableSort>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th data-col="title" data-sort="title">{t("notes.titleField")}</Th>
+                    <Th data-col="category" data-sort="category">{t("notes.category")}</Th>
+                    <Th data-col="updated" data-sort="updated">{t("notes.updated")}</Th>
+                    <Th data-col="actions" />
+                  </tr>
+                </thead>
             <tbody>
               {notes.map((n) => (
                 <tr key={n.id}>
@@ -154,6 +156,7 @@ export default async function NotasPage({
               ))}
             </tbody>
           </Table>
+            </TableSort>
           </ColumnVisibility>
         )}
       </div>

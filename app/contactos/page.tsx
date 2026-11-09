@@ -10,6 +10,7 @@ import {
   EntityDialog,
   DeleteButton,
   ColumnVisibility,
+  TableSort,
   Table,
   Th,
   Td,
@@ -118,14 +119,15 @@ export default async function ContactosPage() {
               { key: "actions", label: t("common.actions") ?? "Acciones" },
             ]}
           >
-            <Table>
-              <thead>
+            <TableSort>
+              <Table>
+                <thead>
               <tr>
-                <Th data-col="name">{t("contacts.firstName")}</Th>
-                <Th data-col="company">{t("contacts.company")}</Th>
-                <Th data-col="email">{t("contacts.email")}</Th>
-                <Th data-col="mobile">{t("contacts.telMobile")}</Th>
-                <Th data-col="contact">{t("contacts.contact")}</Th>
+                <Th data-col="name" data-sort="name">{t("contacts.firstName")}</Th>
+                <Th data-col="company" data-sort="company">{t("contacts.company")}</Th>
+                <Th data-col="email" data-sort="email">{t("contacts.email")}</Th>
+                <Th data-col="mobile" data-sort="mobile">{t("contacts.telMobile")}</Th>
+                <Th data-col="contact" data-sort="contact">{t("contacts.contact")}</Th>
                 <Th data-col="actions" />
               </tr>
             </thead>
@@ -211,6 +213,7 @@ export default async function ContactosPage() {
               ))}
             </tbody>
           </Table>
+            </TableSort>
           </ColumnVisibility>
         )}
       </div>

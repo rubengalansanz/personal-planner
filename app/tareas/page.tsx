@@ -10,6 +10,7 @@ import {
   EntityDialog,
   DeleteButton,
   ColumnVisibility,
+  TableSort,
   Table,
   Th,
   Td,
@@ -103,14 +104,15 @@ export default async function TareasPage() {
               { key: "actions", label: t("common.actions") },
             ]}
           >
-            <Table>
-              <thead>
+            <TableSort>
+              <Table>
+                <thead>
               <tr>
-                <Th data-col="title">{t("tasks.titleField")}</Th>
-                <Th data-col="dueDate">{t("tasks.dueDate")}</Th>
-                <Th data-col="priority">{t("tasks.priority")}</Th>
-                <Th data-col="status">{t("tasks.status")}</Th>
-                <Th data-col="category">{t("tasks.category")}</Th>
+                <Th data-col="title" data-sort="title">{t("tasks.titleField")}</Th>
+                <Th data-col="dueDate" data-sort="dueDate">{t("tasks.dueDate")}</Th>
+                <Th data-col="priority" data-sort="priority">{t("tasks.priority")}</Th>
+                <Th data-col="status" data-sort="status">{t("tasks.status")}</Th>
+                <Th data-col="category" data-sort="category">{t("tasks.category")}</Th>
                 <Th data-col="actions" />
               </tr>
             </thead>
@@ -160,6 +162,7 @@ export default async function TareasPage() {
               ))}
             </tbody>
           </Table>
+            </TableSort>
           </ColumnVisibility>
         )}
       </div>

@@ -60,7 +60,7 @@ function projectFields(t: Translator): FieldDef[] {
         { value: "archived", label: t("planner.statuses.archived") },
       ],
     },
-    { name: "color", label: t("planner.color") },
+    { name: "color", label: t("planner.color"), type: "color" },
   ];
 }
 

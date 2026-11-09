@@ -9,5 +9,6 @@ export { EntityDialog } from "./EntityDialog";
 export { DeleteButton } from "./DeleteButton";
 export { ColumnPicker, useColumnVisibility, type ColumnDef } from "./ColumnPicker";
 export { ColumnVisibility } from "./ColumnVisibility";
+export { TableSort } from "./TableSort";
 export type { FieldDef } from "./EntityDialog";
 export { PageHeader, EmptyState } from "./PageHeader";

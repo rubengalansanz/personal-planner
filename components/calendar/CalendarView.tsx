@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, EntityDialog, type FieldDef } from "@/components/ui";
 import { LinksPanel } from "@/components/links/LinksPanel";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -275,6 +275,13 @@ export function CalendarView({
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [anchor, setAnchor] = useState<Date>(today);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   const pad = (n: number) => String(n).padStart(2, "0");
   const ymd = (d: Date) =>
@@ -350,6 +357,16 @@ export function CalendarView({
 
   const todayKey = ymd(today);
 
+  const toggleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  };
+
   // Navigation helpers
   const shiftMonth = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -424,7 +441,10 @@ export function CalendarView({
   }, [anchor]);
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <div
+      ref={containerRef}
+      className="group relative rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <button
@@ -1047,6 +1067,14 @@ export function CalendarView({
           )}
         </div>
       </Dialog>
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className="absolute bottom-2 right-2 z-10 rounded-md bg-zinc-900/80 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-zinc-100/80 dark:text-zinc-900"
+        title="Pantalla completa"
+      >
+        {isFullscreen ? "Salir" : "Pantalla completa"}
+      </button>
     </div>
   );
 }
